@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Mapa de Pontos de Poda</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Bibliotecas -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+
+  <script>
+    // Inicializa o mapa
+    var map = L.map('map').setView([-5.85, -35.33], 11);
+
+    // Camada base (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Função para converter vírgula em ponto
+    function toFloat(value) {
+      if (!value) return null;
+      return parseFloat(value.replace(",", "."));
+    }
+
+    // Carrega o CSV com os pontos
+    Papa.parse("pontos.csv", {
+      download: true,
+      header: true,
+      delimiter: ";", // importante para CSV brasileiro
+      complete: function(results) {
+        results.data.forEach(function(row) {
+          var lat = toFloat(row.Latitude);
+          var lon = toFloat(row.Longitude);
+
+          if(lat && lon) {
+            L.marker([lat, lon])
+              .addTo(map)
+              .bindPopup(
+                "<b>OI:</b> " + (row["Numero OI"] || "") + "<br>" +
+                "<b>Barramento:</b> " + (row.Barramento || "") + "<br>" +
+                "<b>Tipo:</b> " + (row["Tipo Plano"] || "") + "<br>" +
+                "<b>APP:</b> " + (row.APP || "")
+              );
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
