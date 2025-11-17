@@ -38,8 +38,6 @@
     var markers = L.markerClusterGroup();
     var seen = new Set();
 
-    var iconUrl = 'https://cdn-icons-png.flaticon.com/512/854/854866.png'; // Ícone para os pontos
-
     Papa.parse('pontos_corrigido.csv', {
       download: true,
       header: true,
@@ -53,13 +51,7 @@
             var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
-              var marker = L.marker([lat, lon], {
-                icon: L.icon({
-                  iconUrl: iconUrl,
-                  iconSize: [24, 24],
-                  iconAnchor: [12, 24]
-                })
-              }).bindPopup(
+              var marker = L.marker([lat, lon]).bindPopup(
                 '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
                 '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
                 '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
@@ -70,19 +62,6 @@
           }
         });
         map.addLayer(markers);
-
-        // Ajusta tamanho dos ícones conforme zoom
-        map.on('zoomend', function() {
-          var zoom = map.getZoom();
-          var size = Math.min(zoom * 3, 50); // aumenta até 50px
-          markers.eachLayer(function(marker) {
-            marker.setIcon(L.icon({
-              iconUrl: iconUrl,
-              iconSize: [size, size],
-              iconAnchor: [size / 2, size]
-            }));
-          });
-        });
       }
     });
 
