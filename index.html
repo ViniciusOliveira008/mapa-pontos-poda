@@ -19,7 +19,12 @@
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
   <script>
-    var map = L.map('map').setView([-5.85, -35.33], 11);
+    var map = L.map('map', {
+      center: [-5.85, -35.33],
+      zoom: 14,
+      minZoom: 5,
+      maxZoom: 20
+    });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -27,30 +32,30 @@
 
     function toFloat(value) {
       if (!value) return null;
-      return parseFloat(value.replace(",", "."));
+      return parseFloat(value.replace(',', '.'));
     }
 
     var markers = L.markerClusterGroup();
     var seen = new Set();
 
-    Papa.parse("pontos_corrigido.csv", {
+    Papa.parse('pontos_corrigido.csv', {
       download: true,
       header: true,
-      delimiter: ";",
+      delimiter: ';',
       complete: function(results) {
         results.data.forEach(function(row) {
           var lat = toFloat(row.Latitude);
           var lon = toFloat(row.Longitude);
 
           if(lat && lon) {
-            var key = lat + "," + lon;
+            var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
               var marker = L.marker([lat, lon]).bindPopup(
-                "<b>OI:</b> " + (row["Numero OI"] || "") + "<br>" +
-                "<b>Barramento:</b> " + (row.Barramento || "") + "<br>" +
-                "<b>Tipo:</b> " + (row["Tipo Plano"] || "") + "<br>" +
-                "<b>APP:</b> " + (row.APP || "")
+                '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
+                '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
+                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
+                '<b>APP:</b> ' + (row.APP || '')
               );
               markers.addLayer(marker);
             }
@@ -59,6 +64,29 @@
         map.addLayer(markers);
       }
     });
+
+    // Localização automática do usuário
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(function(position) {
+        var userLat = position.coords.latitude;
+        var userLon = position.coords.longitude;
+
+        if (window.userMarker) {
+          userMarker.setLatLng([userLat, userLon]);
+        } else {
+          window.userMarker = L.marker([userLat, userLon], {
+            icon: L.icon({
+              iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+              iconSize: [32, 32]
+            })
+          }).addTo(map).bindPopup('<b>Sua localização</b>');
+        }
+
+        map.setView([userLat, userLon], 16);
+      }, function(error) {
+        console.error('Erro ao obter localização:', error);
+      });
+    }
   </script>
 </body>
 </html>
