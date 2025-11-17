@@ -8,12 +8,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <style>
     #map { height: 100vh; width: 100%; }
-    #controls { position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px; }
-    button { padding: 5px 10px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div id="controls"> <button id="toggleTracking">Ativar Rastreamento</button> </div>
   <div id="map"></div>
 
   <!-- Bibliotecas -->
@@ -22,7 +19,12 @@
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
   <script>
-    var map = L.map('map').setView([-5.85, -35.33], 11);
+    var map = L.map('map', {
+      center: [-5.85, -35.33],
+      zoom: 14,
+      minZoom: 5,
+      maxZoom: 18
+    });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
@@ -63,44 +65,28 @@
       }
     });
 
-    // Rastreamento do usuário
-    var tracking = false;
-    var watchId = null;
-    var userMarker = null;
+    // Localização automática do usuário
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(function(position) {
+        var userLat = position.coords.latitude;
+        var userLon = position.coords.longitude;
 
-    document.getElementById('toggleTracking').addEventListener('click', function() {
-      if (!tracking) {
-        if (navigator.geolocation) {
-          watchId = navigator.geolocation.watchPosition(function(position) {
-            var userLat = position.coords.latitude;
-            var userLon = position.coords.longitude;
-
-            if (userMarker) {
-              userMarker.setLatLng([userLat, userLon]);
-            } else {
-              userMarker = L.marker([userLat, userLon], {
-                icon: L.icon({
-                  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-                  iconSize: [32, 32]
-                })
-              }).addTo(map).bindPopup('<b>Sua localização</b>');
-            }
-
-            map.setView([userLat, userLon], 14);
-          }, function(error) {
-            console.error('Erro ao obter localização:', error);
-          });
-          this.textContent = 'Desativar Rastreamento';
-          tracking = true;
+        if (window.userMarker) {
+          userMarker.setLatLng([userLat, userLon]);
         } else {
-          alert('Geolocalização não suportada pelo seu navegador.');
+          window.userMarker = L.marker([userLat, userLon], {
+            icon: L.icon({
+              iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+              iconSize: [32, 32]
+            })
+          }).addTo(map).bindPopup('<b>Sua localização</b>');
         }
-      } else {
-        navigator.geolocation.clearWatch(watchId);
-        this.textContent = 'Ativar Rastreamento';
-        tracking = false;
-      }
-    });
+
+        map.setView([userLat, userLon], 16);
+      }, function(error) {
+        console.error('Erro ao obter localização:', error);
+      });
+    }
   </script>
 </body>
 </html>
