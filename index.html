@@ -1,40 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>Mapa de Pontos de Poda</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet/dist/leaflet.css' />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css' />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css' />
   <style>
-    #map { height: 100vh; width: 100%; }
+    html, body { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
+    #map { height: 100%; width: 100%; }
+    .loc-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: #007bff;
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background 0.3s;
+    }
+    .loc-btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <div id="map"></div>
+  <div id='map'></div>
+  <div class='loc-btn' onclick='goToLocation()'>📍 Localizar</div>
 
-  <!-- Bibliotecas -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src='https://unpkg.com/leaflet/dist/leaflet.js'></script>
+  <script src='https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js'></script>
+  <script src='https://unpkg.com/papaparse@5.3.2/papaparse.min.js'></script>
 
   <script>
-    var map = L.map('map', {
-      center: [-5.85, -35.33],
-      zoom: 14,
-      minZoom: 5,
-      maxZoom: 18
-    });
+    var map = L.map('map', { center: [-5.85, -35.33], zoom: 14, minZoom: 5, maxZoom: 18 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    function toFloat(value) {
-      if (!value) return null;
-      return parseFloat(value.replace(',', '.'));
-    }
-
+    function toFloat(value) { if (!value) return null; return parseFloat(value.replace(',', '.')); }
     var markers = L.markerClusterGroup();
     var seen = new Set();
 
@@ -46,17 +52,11 @@
         results.data.forEach(function(row) {
           var lat = toFloat(row.Latitude);
           var lon = toFloat(row.Longitude);
-
           if(lat && lon) {
             var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
-              var marker = L.marker([lat, lon]).bindPopup(
-                '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
-                '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
-                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
-                '<b>APP:</b> ' + (row.APP || '')
-              );
+              var marker = L.marker([lat, lon]).bindPopup('<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' + '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' + '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' + '<b>APP:</b> ' + (row.APP || ''));
               markers.addLayer(marker);
             }
           }
@@ -65,27 +65,18 @@
       }
     });
 
-    // Localização automática do usuário
+    var userLat, userLon, userMarker;
     if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(function(position) {
-        var userLat = position.coords.latitude;
-        var userLon = position.coords.longitude;
-
-        if (window.userMarker) {
-          userMarker.setLatLng([userLat, userLon]);
-        } else {
-          window.userMarker = L.marker([userLat, userLon], {
-            icon: L.icon({
-              iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-              iconSize: [32, 32]
-            })
-          }).addTo(map).bindPopup('<b>Sua localização</b>');
-        }
-
+      navigator.geolocation.getCurrentPosition(function(position) {
+        userLat = position.coords.latitude;
+        userLon = position.coords.longitude;
+        userMarker = L.marker([userLat, userLon], { icon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32] }) }).addTo(map).bindPopup('<b>Sua localização</b>');
         map.setView([userLat, userLon], 16);
-      }, function(error) {
-        console.error('Erro ao obter localização:', error);
       });
+    }
+
+    function goToLocation() {
+      if (userLat && userLon) { map.setView([userLat, userLon], 16); if (userMarker) userMarker.openPopup(); } else { alert('Localização ainda não disponível.'); }
     }
   </script>
 </body>
