@@ -56,7 +56,14 @@
             var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
-              var marker = L.marker([lat, lon]).bindPopup('<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' + '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' + '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' + '<b>APP:</b> ' + (row.APP || ''));
+              var routeLink = '<a href='https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '' target='_blank'>Traçar Rota</a>';
+              var marker = L.marker([lat, lon]).bindPopup(
+                '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
+                '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
+                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
+                '<b>APP:</b> ' + (row.APP || '') + '<br>' +
+                routeLink
+              );
               markers.addLayer(marker);
             }
           }
