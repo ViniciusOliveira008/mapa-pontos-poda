@@ -56,7 +56,26 @@
             var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
-              var marker = L.marker([lat, lon]).bindPopup('<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' + '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' + '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' + '<b>APP:</b> ' + (row.APP || ''));
+              // Garantir que APP seja exibido corretamente, removendo espaços extras
+              var appValue = '';
+              if (row['APP'] !== undefined) {
+                appValue = row['APP'].trim();
+              } else {
+                // Tentar encontrar chave semelhante (caso tenha espaços ou letras diferentes)
+                for (var col in row) {
+                  if (col.trim().toUpperCase() === 'APP') {
+                    appValue = row[col].trim();
+                    break;
+                  }
+                }
+              }
+
+              var marker = L.marker([lat, lon]).bindPopup(
+                '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
+                '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
+                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
+                '<b>APP:</b> ' + appValue
+              );
               markers.addLayer(marker);
             }
           }
