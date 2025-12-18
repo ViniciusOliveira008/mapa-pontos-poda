@@ -40,7 +40,11 @@
     var map = L.map('map', { center: [-5.85, -35.33], zoom: 14, minZoom: 5, maxZoom: 18 });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-    function toFloat(value) { if (!value) return null; return parseFloat(value.replace(',', '.')); }
+    function toFloat(value) { 
+      if (!value) return null; 
+      return parseFloat(value.replace(',', '.')); 
+    }
+
     var markers = L.markerClusterGroup();
     var seen = new Set();
 
@@ -52,50 +56,52 @@
         results.data.forEach(function(row) {
           var lat = toFloat(row.Latitude);
           var lon = toFloat(row.Longitude);
+
           if(lat && lon) {
             var key = lat + ',' + lon;
             if (!seen.has(key)) {
               seen.add(key);
-              // Garantir que APP seja exibido corretamente, removendo espaços extras
-              var appValue = '';
-              if (row['APP'] !== undefined) {
-                appValue = row['APP'].trim();
-              } else {
-                // Tentar encontrar chave semelhante (caso tenha espaços ou letras diferentes)
-                for (var col in row) {
-                  if (col.trim().toUpperCase() === 'APP') {
-                    appValue = row[col].trim();
-                    break;
-                  }
-                }
-              }
 
               var marker = L.marker([lat, lon]).bindPopup(
                 '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
                 '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
-                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
-                '<b>APP:</b> ' + appValue
+                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '')
               );
+
               markers.addLayer(marker);
             }
           }
         });
+
         map.addLayer(markers);
       }
     });
 
     var userLat, userLon, userMarker;
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLon = position.coords.longitude;
-        userMarker = L.marker([userLat, userLon], { icon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32] }) }).addTo(map).bindPopup('<b>Sua localização</b>');
+
+        userMarker = L.marker([userLat, userLon], { 
+          icon: L.icon({ 
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', 
+            iconSize: [32, 32] 
+          }) 
+        }).addTo(map).bindPopup('<b>Sua localização</b>');
+
         map.setView([userLat, userLon], 16);
       });
     }
 
     function goToLocation() {
-      if (userLat && userLon) { map.setView([userLat, userLon], 16); if (userMarker) userMarker.openPopup(); } else { alert('Localização ainda não disponível.'); }
+      if (userLat && userLon) { 
+        map.setView([userLat, userLon], 16); 
+        if (userMarker) userMarker.openPopup(); 
+      } else { 
+        alert('Localização ainda não disponível.'); 
+      }
     }
   </script>
 </body>
