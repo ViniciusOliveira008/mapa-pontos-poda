@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang='pt-BR'>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <title>Mapa de Pontos de Poda</title>
 
   <!-- Leaflet + MarkerCluster CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet/dist/leaflet.css' />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css' />
+  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css' />
 
   <style>
     html, body { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
@@ -46,54 +45,30 @@
     }
     .legend div { margin-bottom: 6px; }
     .legend img { vertical-align: middle; margin-right: 6px; }
-
-    .filters {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: #fff;
-      padding: 10px 12px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      font-size: 14px;
-      z-index: 999;
-    }
-    .filters label { display: block; margin-bottom: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
+  <div id='map'></div>
+  <div class='loc-btn' onclick='goToLocation()'>📍 Localizar</div>
 
-  <!-- Legenda (sem 'Outros') -->
-  <div class="legend">
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"  width="18" height="18" /> Poda de BT</div>
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"    width="18" height="18" /> Poda de MT</div>
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"   width="18" height="18" /> Trocar Isolador</div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="filters">
-    <strong>Filtrar serviços</strong>
-    <label><input type="checkbox" id="chkBT" checked /> Poda de BT</label>
-    <label><input type="checkbox" id="chkMT" checked /> Poda de MT</label>
-    <label><input type="checkbox" id="chkTI" checked /> Trocar Isolador</label>
+  <!-- Legenda com filtros integrados -->
+  <div class='legend'>
+    <strong>Legenda e Filtros</strong>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/green-dot.png' width='18'> Poda de BT <input type='checkbox' id='chkBT' checked></div>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/red-dot.png' width='18'> Poda de MT <input type='checkbox' id='chkMT' checked></div>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/blue-dot.png' width='18'> Trocar Isolador <input type='checkbox' id='chkTI' checked></div>
   </div>
 
   <!-- JS libs -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src='https://unpkg.com/leaflet/dist/leaflet.js'></script>
+  <script src='https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js'></script>
+  <script src='https://unpkg.com/papaparse@5.3.2/papaparse.min.js'></script>
 
   <script>
-    // === Utilitários ===
     function normalize(str) {
-      return String(str || '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .trim().toLowerCase();
+      return String(str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
     }
 
-    // Busca valor por nome de coluna, tolerando acentos/espaços/maiúsculas
     function getValue(row, targetHeader) {
       var target = normalize(targetHeader);
       for (var key in row) {
@@ -110,117 +85,63 @@
       return isNaN(n) ? null : n;
     }
 
-    // === Mapa ===
     var map = L.map('map', { center: [-5.90, -35.29], zoom: 12, minZoom: 5, maxZoom: 18 });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Ícones via URL (pinos/dots)
     var icons = {
-      green:  L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',  iconSize: [32, 32] }),
-      red:    L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',    iconSize: [32, 32] }),
-      blue:   L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',   iconSize: [32, 32] }),
-      user:   L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',   iconSize: [32, 32] })
+      green: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png', iconSize: [32, 32] }),
+      red: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32] }),
+      blue: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', iconSize: [32, 32] }),
+      user: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32] })
     };
 
-    // Clusters por categoria (para filtrar)
-    var clusters = {
-      bt: L.markerClusterGroup(),
-      mt: L.markerClusterGroup(),
-      ti: L.markerClusterGroup()
-    };
+    var markers = L.markerClusterGroup();
+    map.addLayer(markers);
 
-    // Estado de filtros (inicialmente todos ativos)
-    var filters = { bt: true, mt: true, ti: true };
-
-    // Adiciona clusters inicialmente
-    map.addLayer(clusters.bt);
-    map.addLayer(clusters.mt);
-    map.addLayer(clusters.ti);
-
-    // Deduplicação: se houver mesmo ponto para serviços diferentes, permite ambos
-    var seen = new Set();
+    var btMarkers = [], mtMarkers = [], tiMarkers = [];
 
     Papa.parse('pontos_corrigido.csv', {
       download: true,
       header: true,
       delimiter: ';',
       skipEmptyLines: 'greedy',
-      complete: function (results) {
-        results.data.forEach(function (row) {
+      complete: function(results) {
+        results.data.forEach(function(row) {
           var lat = toFloat(getValue(row, 'Latitude'));
           var lon = toFloat(getValue(row, 'Longitude'));
-          if (lat == null || lon == null) return;
+          if (!lat || !lon) return;
 
-          // Serviço com normalização
-          var servicoRaw  = getValue(row, 'Serviço'); // cobre 'Serviço ' / 'Servico'
+          var servicoRaw = getValue(row, 'Serviço');
           var servicoNorm = normalize(servicoRaw);
 
-          var categoria = null, iconChoice = null;
-          if (servicoNorm.includes('poda de bt')) {
-            categoria = 'bt'; iconChoice = icons.green;
-          } else if (servicoNorm.includes('poda de mt')) {
-            categoria = 'mt'; iconChoice = icons.red;
-          } else if (servicoNorm.includes('trocar isolador')) {
-            categoria = 'ti'; iconChoice = icons.blue;
-          } else {
-            // Sem 'Outros': ignora serviços fora dos três tipos
-            return;
-          }
-
-          // Evita duplicatas exatas por (lat, lon, categoria)
-          var key = lat + ',' + lon + '|' + categoria;
-          if (seen.has(key)) return;
-          seen.add(key);
-
-          var numeroOI   = getValue(row, 'Numero OI');
-          var barramento = getValue(row, 'Barramento');
-          var tipoPlano  = getValue(row, 'Tipo Plano');
+          var iconChoice, arr;
+          if (servicoNorm.includes('poda de bt')) { iconChoice = icons.green; arr = btMarkers; }
+          else if (servicoNorm.includes('poda de mt')) { iconChoice = icons.red; arr = mtMarkers; }
+          else if (servicoNorm.includes('trocar isolador')) { iconChoice = icons.blue; arr = tiMarkers; }
+          else { return; }
 
           var marker = L.marker([lat, lon], { icon: iconChoice }).bindPopup(
-            '<b>OI:</b> ' + (numeroOI || '') + '<br>' +
-            '<b>Barramento:</b> ' + (barramento || '') + '<br>' +
-            '<b>Tipo:</b> ' + (tipoPlano || '') + '<br>' +
-            '<b>Serviço:</b> ' + (servicoRaw || '')
+            '<b>OI:</b> ' + getValue(row, 'Numero OI') + '<br>' +
+            '<b>Barramento:</b> ' + getValue(row, 'Barramento') + '<br>' +
+            '<b>Tipo:</b> ' + getValue(row, 'Tipo Plano') + '<br>' +
+            '<b>Serviço:</b> ' + servicoRaw
           );
 
-          // Adiciona ao cluster correto
-          clusters[categoria].addLayer(marker);
+          arr.push(marker);
+          markers.addLayer(marker);
         });
 
-        // Ajusta o mapa para enquadrar todos os pontos carregados
-        var bounds;
-        ['bt','mt','ti'].forEach(function(cat){
-          var b = clusters[cat].getBounds();
-          if (b && b.isValid()) {
-            if (!bounds) bounds = b;
-            else bounds.extend(b);
-          }
-        });
-        if (bounds && bounds.isValid()) {
-          map.fitBounds(bounds, { padding: [20,20] });
-        }
-      },
-      error: function(err) {
-        console.error('Erro ao ler CSV:', err);
-        alert('Erro ao carregar o CSV. Verifique o arquivo e tente novamente.');
+        var bounds = markers.getBounds();
+        if (bounds && bounds.isValid()) map.fitBounds(bounds, { padding: [20,20] });
       }
     });
 
-    // Geolocalização do usuário
     var userLat, userLon, userMarker;
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function (position) {
+      navigator.geolocation.getCurrentPosition(function(position) {
         userLat = position.coords.latitude;
         userLon = position.coords.longitude;
-
-        userMarker = L.marker([userLat, userLon], { icon: icons.user })
-          .addTo(map).bindPopup('<b>Sua localização</b>');
-
-        // Não sobrescreve o fitBounds inicial, apenas centraliza se desejar:
-        // map.setView([userLat, userLon], 16);
+        userMarker = L.marker([userLat, userLon], { icon: icons.user }).addTo(map).bindPopup('<b>Sua localização</b>');
       });
     }
 
@@ -233,39 +154,13 @@
       }
     }
 
-    // === Filtros (checkboxes) ===
-    document.getElementById('chkBT').addEventListener('change', function(e){
-      filters.bt = e.target.checked;
-      updateFilters();
-    });
-    document.getElementById('chkMT').addEventListener('change', function(e){
-      filters.mt = e.target.checked;
-      updateFilters();
-    });
-    document.getElementById('chkTI').addEventListener('change', function(e){
-      filters.ti = e.target.checked;
-      updateFilters();
-    });
+    document.getElementById('chkBT').addEventListener('change', function(e){ updateFilter(btMarkers, e.target.checked); });
+    document.getElementById('chkMT').addEventListener('change', function(e){ updateFilter(mtMarkers, e.target.checked); });
+    document.getElementById('chkTI').addEventListener('change', function(e){ updateFilter(tiMarkers, e.target.checked); });
 
-    function updateFilters() {
-      // BT
-      if (filters.bt) {
-        if (!map.hasLayer(clusters.bt)) map.addLayer(clusters.bt);
-      } else {
-        if (map.hasLayer(clusters.bt)) map.removeLayer(clusters.bt);
-      }
-      // MT
-      if (filters.mt) {
-        if (!map.hasLayer(clusters.mt)) map.addLayer(clusters.mt);
-      } else {
-        if (map.hasLayer(clusters.mt)) map.removeLayer(clusters.mt);
-      }
-      // Trocar Isolador
-      if (filters.ti) {
-        if (!map.hasLayer(clusters.ti)) map.addLayer(clusters.ti);
-      } else {
-        if (map.hasLayer(clusters.ti)) map.removeLayer(clusters.ti);
-      }
+    function updateFilter(arr, show) {
+      if (show) arr.forEach(m => markers.addLayer(m));
+      else arr.forEach(m => markers.removeLayer(m));
     }
   </script>
 </body>
