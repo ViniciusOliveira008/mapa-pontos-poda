@@ -1,15 +1,20 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset='utf-8' />
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mapa de Pontos de Poda</title>
-  <link rel='stylesheet' href='https://unpkg.com/leaflet/dist/leaflet.css' />
-  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css' />
-  <link rel='stylesheet' href='https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css' />
+
+  <!-- Leaflet + MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
   <style>
     html, body { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
     #map { height: 100%; width: 100%; }
+
     .loc-btn {
       position: fixed;
       bottom: 20px;
@@ -26,117 +31,149 @@
       transition: background 0.3s;
     }
     .loc-btn:hover { background: #0056b3; }
+
     .legend {
       position: fixed;
       bottom: 80px;
       right: 20px;
-      background: white;
-      padding: 10px;
+      background: #fff;
+      padding: 10px 12px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
       font-size: 14px;
+      line-height: 1.4;
+      z-index: 999;
     }
     .legend div { margin-bottom: 6px; }
     .legend img { vertical-align: middle; margin-right: 6px; }
   </style>
 </head>
 <body>
-  <div id='map'></div>
-  <div class='loc-btn' onclick='goToLocation()'>📍 Localizar</div>
-  <div class='legend'>
-    <div><img src='https://maps.google.com/mapfiles/ms/icons/green-dot.png' width='20'> Poda de BT</div>
-    <div><img src='https://maps.google.com/mapfiles/ms/icons/red-dot.png' width='20'> Poda de MT</div>
-    <div><img src='https://maps.google.com/mapfiles/ms/icons/blue-dot.png' width='20'> Trocar Isolador</div>
-    <div><img src='https://maps.google.com/mapfiles/ms/icons/yellow-dot.png' width='20'> Outros</div>
+  <div id="map"></div>
+  <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
+
+  <!-- Legenda com ícones via URL -->
+  <div class="legend">
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"  width="18" height="18" alt=""> Poda de BT</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"    width="18" height="18" alt=""> Poda de MT</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"   width="18" height="18" alt=""> Trocar Isolador</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/yellow-dot.png" width="18" height="18" alt=""> Outros</div>
   </div>
 
-  <script src='https://unpkg.com/leaflet/dist/leaflet.js'></script>
-  <script src='https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js'></script>
-  <script src='https://unpkg.com/papaparse@5.3.2/papaparse.min.js'></script>
+  <!-- JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
   <script>
-    var map = L.map('map', { center: [-5.85, -35.33], zoom: 14, minZoom: 5, maxZoom: 18 });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+    // === Utilitários ===
 
-    function toFloat(value) {
-      if (!value) return null;
-      return parseFloat(String(value).replace(',', '.'));
+    // Normaliza texto: remove acentos, trim e minúsculas
+    function normalize(str) {
+      return String(str || '')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim().toLowerCase();
     }
 
-    var markers = L.markerClusterGroup();
-    var seen = new Set();
-
-    var icons = {
-      green: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png', iconSize: [32, 32] }),
-      red:   L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32] }),
-      blue:  L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', iconSize: [32, 32] }),
-      yellow:L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png', iconSize: [32, 32] }),
-      user:  L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [32, 32] })
-    };
-
-    function getServicoValue(row) {
-      var keys = ['Serviço', 'Servico', 'SERVIÇO', 'SERVICO'];
-      for (var i=0; i<keys.length; i++) {
-        if (row[keys[i]] !== undefined && row[keys[i]] !== null) {
-          return String(row[keys[i]]);
-        }
+    // Pega valor de uma coluna ignorando acentos/maiúsc./espaços no NOME da coluna (resolve "Serviço " com espaço no fim)
+    function getValue(row, targetHeader) {
+      var target = normalize(targetHeader);
+      for (var key in row) {
+        if (!Object.prototype.hasOwnProperty.call(row, key)) continue;
+        if (normalize(key) === target) return row[key];
       }
       return '';
     }
 
-    function normalize(str) {
-      return String(str)
-        .normalize('NFD').replace(/[̀-ͯ]/g, '')
-        .trim().toLowerCase();
+    // Converte string com vírgula para float
+    function toFloat(value) {
+      if (value === null || value === undefined) return null;
+      var s = String(value).replace(',', '.');
+      var n = parseFloat(s);
+      return isNaN(n) ? null : n;
     }
+
+    // === Mapa ===
+    var map = L.map('map', { center: [-5.90, -35.29], zoom: 12, minZoom: 5, maxZoom: 18 });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Ícones como pinos/dots via URL (sem local)
+    var icons = {
+      green:  L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',  iconSize: [32, 32] }),
+      red:    L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',    iconSize: [32, 32] }),
+      blue:   L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',   iconSize: [32, 32] }),
+      yellow: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png', iconSize: [32, 32] }),
+      user:   L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',   iconSize: [32, 32] })
+    };
+
+    var markers = L.markerClusterGroup();
+    var seen = new Set();
 
     Papa.parse('pontos_corrigido.csv', {
       download: true,
       header: true,
       delimiter: ';',
-      complete: function(results) {
-        results.data.forEach(function(row) {
-          var lat = toFloat(row.Latitude);
-          var lon = toFloat(row.Longitude);
-          if (lat && lon) {
-            var key = lat + ',' + lon;
-            if (!seen.has(key)) {
-              seen.add(key);
+      skipEmptyLines: 'greedy',
+      complete: function (results) {
+        results.data.forEach(function (row) {
+          // Use getValue para tolerar variações no cabeçalho (ex.: "Serviço " com espaço)
+          var lat = toFloat(getValue(row, 'Latitude'));
+          var lon = toFloat(getValue(row, 'Longitude'));
+          if (!lat || !lon) return;
 
-              var servicoRaw = getServicoValue(row);
-              var servicoNorm = normalize(servicoRaw);
+          var key = lat + ',' + lon;
+          if (seen.has(key)) return;
+          seen.add(key);
 
-              var iconChoice = icons.yellow;
-              if (servicoNorm === 'poda de bt') {
-                iconChoice = icons.green;
-              } else if (servicoNorm === 'poda de mt') {
-                iconChoice = icons.red;
-              } else if (servicoNorm === 'trocar isolador') {
-                iconChoice = icons.blue;
-              }
+          // Lê serviço e normaliza conteúdo
+          var servicoRaw  = getValue(row, 'Serviço'); // também cobre "Servico" ou "Serviço "
+          var servicoNorm = normalize(servicoRaw);
 
-              var marker = L.marker([lat, lon], { icon: iconChoice }).bindPopup(
-                '<b>OI:</b> ' + (row['Numero OI'] || row['NUMERO OI'] || '') + '<br>' +
-                '<b>Barramento:</b> ' + (row.Barramento || row['BARRAMENTO'] || '') + '<br>' +
-                '<b>Tipo:</b> ' + (row['Tipo Plano'] || row['TIPO PLANO'] || '') + '<br>' +
-                '<b>Serviço:</b> ' + (servicoRaw || '')
-              );
-              markers.addLayer(marker);
-            }
+          // Match por "contém" para cobrir variações tipo "Poda de BT - Urgente"
+          var iconChoice = icons.yellow; // padrão
+          if (servicoNorm.includes('poda de bt')) {
+            iconChoice = icons.green;
+          } else if (servicoNorm.includes('poda de mt')) {
+            iconChoice = icons.red;
+          } else if (servicoNorm.includes('trocar isolador')) {
+            iconChoice = icons.blue;
           }
+
+          var numeroOI   = getValue(row, 'Numero OI');
+          var barramento = getValue(row, 'Barramento');
+          var tipoPlano  = getValue(row, 'Tipo Plano');
+
+          var marker = L.marker([lat, lon], { icon: iconChoice }).bindPopup(
+            '<b>OI:</b> ' + (numeroOI || '') + '<br>' +
+            '<b>Barramento:</b> ' + (barramento || '') + '<br>' +
+            '<b>Tipo:</b> ' + (tipoPlano || '') + '<br>' +
+            '<b>Serviço:</b> ' + (servicoRaw || '')
+          );
+
+          markers.addLayer(marker);
         });
+
         map.addLayer(markers);
+      },
+      error: function(err) {
+        console.error('Erro ao ler CSV:', err);
+        alert('Erro ao carregar o CSV. Verifique o arquivo e tente novamente.');
       }
     });
 
+    // Geolocalização do usuário
     var userLat, userLon, userMarker;
-
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
+      navigator.geolocation.getCurrentPosition(function (position) {
         userLat = position.coords.latitude;
         userLon = position.coords.longitude;
+
         userMarker = L.marker([userLat, userLon], { icon: icons.user })
           .addTo(map).bindPopup('<b>Sua localização</b>');
+
         map.setView([userLat, userLon], 16);
       });
     }
