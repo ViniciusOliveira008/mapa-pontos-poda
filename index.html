@@ -46,36 +46,54 @@
     }
     .legend div { margin-bottom: 6px; }
     .legend img { vertical-align: middle; margin-right: 6px; }
+
+    .filters {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      font-size: 14px;
+      z-index: 999;
+    }
+    .filters label { display: block; margin-bottom: 6px; cursor: pointer; }
   </style>
 </head>
 <body>
   <div id="map"></div>
   <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
 
-  <!-- Legenda com ícones via URL -->
+  <!-- Legenda (sem 'Outros') -->
   <div class="legend">
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"  width="18" height="18" alt=""> Poda de BT</div>
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"    width="18" height="18" alt=""> Poda de MT</div>
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"   width="18" height="18" alt=""> Trocar Isolador</div>
-    <div><img src="https://maps.google.com/mapfiles/ms/icons/yellow-dot.png" width="18" height="18" alt=""> Outros</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"  width="18" height="18" /> Poda de BT</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"    width="18" height="18" /> Poda de MT</div>
+    <div><img src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"   width="18" height="18" /> Trocar Isolador</div>
   </div>
 
-  <!-- JS -->
+  <!-- Filtros -->
+  <div class="filters">
+    <strong>Filtrar serviços</strong>
+    <label><input type="checkbox" id="chkBT" checked /> Poda de BT</label>
+    <label><input type="checkbox" id="chkMT" checked /> Poda de MT</label>
+    <label><input type="checkbox" id="chkTI" checked /> Trocar Isolador</label>
+  </div>
+
+  <!-- JS libs -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
   <script>
     // === Utilitários ===
-
-    // Normaliza texto: remove acentos, trim e minúsculas
     function normalize(str) {
       return String(str || '')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .trim().toLowerCase();
     }
 
-    // Pega valor de uma coluna ignorando acentos/maiúsc./espaços no NOME da coluna (resolve "Serviço " com espaço no fim)
+    // Busca valor por nome de coluna, tolerando acentos/espaços/maiúsculas
     function getValue(row, targetHeader) {
       var target = normalize(targetHeader);
       for (var key in row) {
@@ -85,7 +103,6 @@
       return '';
     }
 
-    // Converte string com vírgula para float
     function toFloat(value) {
       if (value === null || value === undefined) return null;
       var s = String(value).replace(',', '.');
@@ -100,16 +117,30 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Ícones como pinos/dots via URL (sem local)
+    // Ícones via URL (pinos/dots)
     var icons = {
       green:  L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',  iconSize: [32, 32] }),
       red:    L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',    iconSize: [32, 32] }),
       blue:   L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',   iconSize: [32, 32] }),
-      yellow: L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png', iconSize: [32, 32] }),
       user:   L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',   iconSize: [32, 32] })
     };
 
-    var markers = L.markerClusterGroup();
+    // Clusters por categoria (para filtrar)
+    var clusters = {
+      bt: L.markerClusterGroup(),
+      mt: L.markerClusterGroup(),
+      ti: L.markerClusterGroup()
+    };
+
+    // Estado de filtros (inicialmente todos ativos)
+    var filters = { bt: true, mt: true, ti: true };
+
+    // Adiciona clusters inicialmente
+    map.addLayer(clusters.bt);
+    map.addLayer(clusters.mt);
+    map.addLayer(clusters.ti);
+
+    // Deduplicação: se houver mesmo ponto para serviços diferentes, permite ambos
     var seen = new Set();
 
     Papa.parse('pontos_corrigido.csv', {
@@ -119,28 +150,30 @@
       skipEmptyLines: 'greedy',
       complete: function (results) {
         results.data.forEach(function (row) {
-          // Use getValue para tolerar variações no cabeçalho (ex.: "Serviço " com espaço)
           var lat = toFloat(getValue(row, 'Latitude'));
           var lon = toFloat(getValue(row, 'Longitude'));
-          if (!lat || !lon) return;
+          if (lat == null || lon == null) return;
 
-          var key = lat + ',' + lon;
-          if (seen.has(key)) return;
-          seen.add(key);
-
-          // Lê serviço e normaliza conteúdo
-          var servicoRaw  = getValue(row, 'Serviço'); // também cobre "Servico" ou "Serviço "
+          // Serviço com normalização
+          var servicoRaw  = getValue(row, 'Serviço'); // cobre 'Serviço ' / 'Servico'
           var servicoNorm = normalize(servicoRaw);
 
-          // Match por "contém" para cobrir variações tipo "Poda de BT - Urgente"
-          var iconChoice = icons.yellow; // padrão
+          var categoria = null, iconChoice = null;
           if (servicoNorm.includes('poda de bt')) {
-            iconChoice = icons.green;
+            categoria = 'bt'; iconChoice = icons.green;
           } else if (servicoNorm.includes('poda de mt')) {
-            iconChoice = icons.red;
+            categoria = 'mt'; iconChoice = icons.red;
           } else if (servicoNorm.includes('trocar isolador')) {
-            iconChoice = icons.blue;
+            categoria = 'ti'; iconChoice = icons.blue;
+          } else {
+            // Sem 'Outros': ignora serviços fora dos três tipos
+            return;
           }
+
+          // Evita duplicatas exatas por (lat, lon, categoria)
+          var key = lat + ',' + lon + '|' + categoria;
+          if (seen.has(key)) return;
+          seen.add(key);
 
           var numeroOI   = getValue(row, 'Numero OI');
           var barramento = getValue(row, 'Barramento');
@@ -153,10 +186,22 @@
             '<b>Serviço:</b> ' + (servicoRaw || '')
           );
 
-          markers.addLayer(marker);
+          // Adiciona ao cluster correto
+          clusters[categoria].addLayer(marker);
         });
 
-        map.addLayer(markers);
+        // Ajusta o mapa para enquadrar todos os pontos carregados
+        var bounds;
+        ['bt','mt','ti'].forEach(function(cat){
+          var b = clusters[cat].getBounds();
+          if (b && b.isValid()) {
+            if (!bounds) bounds = b;
+            else bounds.extend(b);
+          }
+        });
+        if (bounds && bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [20,20] });
+        }
       },
       error: function(err) {
         console.error('Erro ao ler CSV:', err);
@@ -174,7 +219,8 @@
         userMarker = L.marker([userLat, userLon], { icon: icons.user })
           .addTo(map).bindPopup('<b>Sua localização</b>');
 
-        map.setView([userLat, userLon], 16);
+        // Não sobrescreve o fitBounds inicial, apenas centraliza se desejar:
+        // map.setView([userLat, userLon], 16);
       });
     }
 
@@ -184,6 +230,41 @@
         if (userMarker) userMarker.openPopup();
       } else {
         alert('Localização ainda não disponível.');
+      }
+    }
+
+    // === Filtros (checkboxes) ===
+    document.getElementById('chkBT').addEventListener('change', function(e){
+      filters.bt = e.target.checked;
+      updateFilters();
+    });
+    document.getElementById('chkMT').addEventListener('change', function(e){
+      filters.mt = e.target.checked;
+      updateFilters();
+    });
+    document.getElementById('chkTI').addEventListener('change', function(e){
+      filters.ti = e.target.checked;
+      updateFilters();
+    });
+
+    function updateFilters() {
+      // BT
+      if (filters.bt) {
+        if (!map.hasLayer(clusters.bt)) map.addLayer(clusters.bt);
+      } else {
+        if (map.hasLayer(clusters.bt)) map.removeLayer(clusters.bt);
+      }
+      // MT
+      if (filters.mt) {
+        if (!map.hasLayer(clusters.mt)) map.addLayer(clusters.mt);
+      } else {
+        if (map.hasLayer(clusters.mt)) map.removeLayer(clusters.mt);
+      }
+      // Trocar Isolador
+      if (filters.ti) {
+        if (!map.hasLayer(clusters.ti)) map.addLayer(clusters.ti);
+      } else {
+        if (map.hasLayer(clusters.ti)) map.removeLayer(clusters.ti);
       }
     }
   </script>
