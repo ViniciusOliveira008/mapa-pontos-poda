@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,11 +27,29 @@
       transition: background 0.3s;
     }
     .loc-btn:hover { background: #0056b3; }
+    .legend {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      font-size: 14px;
+    }
+    .legend div { margin-bottom: 6px; }
+    .legend img { vertical-align: middle; margin-right: 6px; }
   </style>
 </head>
 <body>
   <div id='map'></div>
   <div class='loc-btn' onclick='goToLocation()'>📍 Localizar</div>
+  <div class='legend'>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/green-dot.png' width='20'> Poda de BT</div>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/red-dot.png' width='20'> Poda de MT</div>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/blue-dot.png' width='20'> Trocar Isolador</div>
+    <div><img src='https://maps.google.com/mapfiles/ms/icons/yellow-dot.png' width='20'> Outros</div>
+  </div>
 
   <script src='https://unpkg.com/leaflet/dist/leaflet.js'></script>
   <script src='https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js'></script>
@@ -48,6 +67,13 @@
     var markers = L.markerClusterGroup();
     var seen = new Set();
 
+    var icons = {
+      "Poda de BT": L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png', iconSize: [32, 32] }),
+      "Poda de MT": L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32] }),
+      "Trocar Isolador": L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', iconSize: [32, 32] }),
+      "default": L.icon({ iconUrl: 'https://maps.google.com/mapfiles/ms/icons/yellow-dot.png', iconSize: [32, 32] })
+    };
+
     Papa.parse('pontos_corrigido.csv', {
       download: true,
       header: true,
@@ -62,10 +88,14 @@
             if (!seen.has(key)) {
               seen.add(key);
 
-              var marker = L.marker([lat, lon]).bindPopup(
+              var servico = row.Serviço || '';
+              var icon = icons[servico] || icons["default"];
+
+              var marker = L.marker([lat, lon], { icon: icon }).bindPopup(
                 '<b>OI:</b> ' + (row['Numero OI'] || '') + '<br>' +
                 '<b>Barramento:</b> ' + (row.Barramento || '') + '<br>' +
-                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '')
+                '<b>Tipo:</b> ' + (row['Tipo Plano'] || '') + '<br>' +
+                '<b>Serviço:</b> ' + servico
               );
 
               markers.addLayer(marker);
