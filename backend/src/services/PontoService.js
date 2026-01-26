@@ -6,20 +6,20 @@
         };
 
         async listar(req, res) {
-            const pontos = await this.PontoRepository.list();
+            const pontos = await this.PontoRepository.listar();
             res.json(pontos);
         };
 
         async criar(req, res) {
             const novoPonto = req.body;
-            const id = await this.PontoRepository.create(novoPonto);
+            const id = await this.PontoRepository.criar(novoPonto);
             res.status(201).json({ id });
         };
 
         async atualizar(req, res) {
             const { id } = req.params;
             const pontoAtualizado = req.body;
-            await this.PontoRepository.update(id, pontoAtualizado);
+            await this.PontoRepository.atualizar(id, pontoAtualizado);
             res.status(204).send();
         };
     }
