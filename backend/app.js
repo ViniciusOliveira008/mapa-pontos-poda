@@ -1,7 +1,9 @@
 import express from 'express'
 import PontoRoute from './src/routes/PontoRoute.js'
+import cors from 'cors'
 
 const app = express()
+app.use(cors())
 const port = 3000
 
 app.get('/', (req, res) => {
