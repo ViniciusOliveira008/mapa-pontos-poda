@@ -47,6 +47,12 @@ class PontoRepository {
       ],
     );
   }
+
+  async mudarStatus(id, status) {
+    await this.db.execute (
+      "UPDATE pontos SET status_defeito = ?  WHERE id = ? ", [status, id]
+    );
+  };
 }
 
 export default PontoRepository;
