@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS pontos (
-    id VARCHAR(100) NOT NULL,
+    id INT NOT NULL,
     numero_oi VARCHAR(100) NOT NULL,
     tipo_plano VARCHAR(100) NOT NULL,
     latitude DECIMAL(10, 8) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS registros (
     data_execucao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     descricao TEXT,
     equipe VARCHAR(100) NOT NULL,
-    id_ponto VARCHAR(100) NOT NULL,
+    id_ponto INT NOT NULL,
     
 
     PRIMARY KEY (id),
