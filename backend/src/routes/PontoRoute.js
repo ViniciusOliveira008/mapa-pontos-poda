@@ -7,6 +7,7 @@ const router = express.Router();
 const pontoService = new PontoService(dbConnection);
 
 router.get('/listar', async (req, res) => pontoService.listar(req, res));
+router.get('/listar_ativos', async (req, res) => pontoService.listar_ativos(req, res));
 router.post('/criar', async (req, res) => pontoService.criar(req, res));
 router.put('/atualizar/:id', async (req, res) => pontoService.atualizar(req, res));
 router.post('/mudar_status/:id', async (req, res) => pontoService.mudarStatus(req, res));

@@ -9,9 +9,14 @@
 
         async listar(req, res) {
             const pontos = await this.PontoRepository.listar();
-            res.json(pontos);
+            res.status(200).json(pontos);
         };
 
+        async listar_ativos(req, res) {
+            const pontos = await this.PontoRepository.listar_ativos();
+            res.status(200).json(pontos);
+        }
+ 
         async criar(req, res) {
             const novoPonto = req.body;
             const id = await this.PontoRepository.criar(novoPonto);

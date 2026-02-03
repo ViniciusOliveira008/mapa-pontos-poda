@@ -1,6 +1,7 @@
 import express from 'express'
 import PontoRoute from './src/routes/PontoRoute.js'
 import cors from 'cors'
+import 'dotenv/config'
 
 const app = express()
 app.use(express.json())

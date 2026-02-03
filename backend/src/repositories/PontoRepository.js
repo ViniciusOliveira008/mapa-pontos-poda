@@ -4,6 +4,11 @@ class PontoRepository {
   }
 
   async listar() {
+    const [rows] = await this.db.execute("SELECT * FROM pontos");
+    return rows;
+  }
+
+  async listar_ativos() {
     const [rows] = await this.db.execute("SELECT * FROM pontos WHERE status_defeito = ?", ['pendente'])
     return rows;
   }
