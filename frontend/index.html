@@ -124,7 +124,7 @@ const btMarkers=[], mtMarkers=[], tiMarkers=[]
 let pontoSelecionadoId = null
 
 /* ===== CARREGAR PONTOS ===== */
-fetch('http://localhost:3000/pontos/listar')
+fetch('http://localhost:3000/pontos/listar_ativos')
   .then(r=>r.json())
   .then(data=>{
     data.forEach(row=>{
