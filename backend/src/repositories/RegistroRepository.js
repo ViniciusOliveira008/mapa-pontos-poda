@@ -8,10 +8,10 @@ class RegistroRepository {
         return rows;
     }
 
-    async criar(registro) {
+    async criar(registro, barramento) {
         const [result] = await this.db.execute(
-            'INSERT INTO registros (data_execucao, descricao, equipe, id_ponto) VALUES (?, ?, ?, ?)',
-            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto]
+            'INSERT INTO registros (data_execucao, descricao, equipe, id_ponto, barramento) VALUES (?, ?, ?, ?, ?)',
+            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto, barramento]
         );
         return result.insertId;
     }
@@ -26,8 +26,8 @@ class RegistroRepository {
 
     async atualizar(id, registro) {
         await this.db.execute(
-            'UPDATE registros SET data_execucao = ?, descricao = ?, equipe = ?, id_ponto = ? WHERE id = ?',
-            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto, id]
+            'UPDATE registros SET data_execucao = ?, descricao = ?, equipe = ?, id_ponto = ?, barramento = ? WHERE id = ?',
+            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto, registro.barramento, id]
         );
     }
 

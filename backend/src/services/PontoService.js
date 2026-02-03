@@ -35,12 +35,14 @@
                 return res.status(404).json({ error: 'Ponto não encontrado' });
             }
 
+            const barramento = ponto.barramento
+
             let status = ''
             if (ponto.status_defeito == 'pendente') {
                 status = 'executado'
             } else { status = 'pendente'}
 
-            await this.RegistroRepository.criar(registro)
+            await this.RegistroRepository.criar(registro, barramento)
             await this.PontoRepository.mudarStatus(id, status);
 
             return res.status(200).json({ ponto: { ...ponto, status_defeito: status } });

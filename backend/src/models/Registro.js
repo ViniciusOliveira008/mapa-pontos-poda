@@ -4,13 +4,15 @@ class Registro {
     descricao;
     equipe;
     id_ponto;
+    barramento;
 
-    constructor (id, data_execucao, descricao, equipe, id_ponto) {
+    constructor (id, data_execucao, descricao, equipe, id_ponto, barramento) {
         this.id = id;
         this.data_execucao = data_execucao;
         this.descricao = descricao;
         this.equipe = equipe;
         this.id_ponto = id_ponto;
+        this.barramento = barramento;
     }
 
     get_id () {
@@ -33,6 +35,10 @@ class Registro {
         return this.id_ponto;
     }
 
+    get_barramento () {
+        return this.barramento;
+    }
+
     set_data_execucao (data_execucao) {
         this.data_execucao = data_execucao;
     }
@@ -47,6 +53,10 @@ class Registro {
 
     set_id_ponto (id_ponto) {
         this.id_ponto = id_ponto;
+    }
+
+    set_barramento (barramento) {
+        this.barramento = barramento;
     }
 }
 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS registros (
     descricao TEXT,
     equipe VARCHAR(100) NOT NULL,
     id_ponto INT NOT NULL,
-    
+    barramento VARCHAR(100) NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (id_ponto) REFERENCES pontos(id)
