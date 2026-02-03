@@ -124,7 +124,7 @@ const btMarkers=[], mtMarkers=[], tiMarkers=[]
 let pontoSelecionadoId = null
 
 /* ===== CARREGAR PONTOS ===== */
-fetch('http://localhost:3000/pontos/listar_ativos')
+fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_ativos')
   .then(r=>r.json())
   .then(data=>{
     data.forEach(row=>{
@@ -182,7 +182,7 @@ function confirmarExecucao(){
     return
   }
 
-  fetch(`http://localhost:3000/pontos/mudar_status/${pontoSelecionadoId}`,{
+  fetch(`https://mapa-pontos-poda.onrender.com/pontos/mudar_status/${pontoSelecionadoId}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
