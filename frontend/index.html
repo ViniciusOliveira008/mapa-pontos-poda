@@ -142,6 +142,7 @@ fetch('http://localhost:3000/pontos/listar')
       const marker = L.marker([lat,lon],{icon})
         .bindPopup(`
           <b>OI:</b> ${row.numero_oi}<br>
+          <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
           <button onclick="abrirModal(${row.id})">Executar</button>
         `)
@@ -188,7 +189,7 @@ function confirmarExecucao(){
       equipe,
       data_execucao: data,
       descricao: inputDescricao.value,
-      id_ponto: pontoSelecionadoId
+      id_ponto: pontoSelecionadoId,
     })
   })
   .then(r=>{
