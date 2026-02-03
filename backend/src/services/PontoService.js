@@ -1,8 +1,10 @@
     import PontoRepository from '../repositories/PontoRepository.js';
+    import RegistroRepository from '../repositories/RegistroRepository.js';
 
     class PontoService {
         constructor(db) {
             this.PontoRepository = new PontoRepository(db);
+            this.RegistroRepository = new RegistroRepository(db);
         };
 
         async listar(req, res) {
@@ -25,6 +27,9 @@
 
         async mudarStatus(req, res) {
             const { id } = req.params
+            const registro = req.body
+            console.log(registro)
+
             const ponto = await this.PontoRepository.encontrarPorId(id); 
             if (!ponto) { 
                 return res.status(404).json({ error: 'Ponto não encontrado' });
@@ -34,8 +39,10 @@
             if (ponto.status_defeito == 'pendente') {
                 status = 'executado'
             } else { status = 'pendente'}
-            
+
+            await this.RegistroRepository.criar(registro)
             await this.PontoRepository.mudarStatus(id, status);
+
             return res.status(200).json({ ponto: { ...ponto, status_defeito: status } });
         }
     }
