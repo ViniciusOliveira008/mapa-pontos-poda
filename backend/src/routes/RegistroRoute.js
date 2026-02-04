@@ -1,5 +1,5 @@
 import RegistroService from "../services/RegistroService";
-import express from express 
+import express from 'express' 
 import dbConnection from "../config/db";
 
 const registroService = new RegistroService(dbConnection);
