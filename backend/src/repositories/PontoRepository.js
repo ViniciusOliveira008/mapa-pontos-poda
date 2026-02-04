@@ -53,9 +53,9 @@ class PontoRepository {
     );
   }
 
-  async mudarStatus(id, status) {
+  async executarPonto(id) {
     await this.db.execute (
-      "UPDATE pontos SET status_defeito = ?  WHERE id = ? ", [status, id]
+      "UPDATE pontos SET status_defeito = 'executado'  WHERE id = ? ", [id]
     );
   };
 }

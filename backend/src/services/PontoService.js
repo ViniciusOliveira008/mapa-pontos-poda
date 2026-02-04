@@ -30,7 +30,7 @@
             res.status(204).send();
         };
 
-        async mudarStatus(req, res) {
+        async executarPonto(req, res) {
             const { id } = req.params
             const registro = req.body
 
@@ -41,15 +41,10 @@
 
             const barramento = ponto.barramento
 
-            let status = ''
-            if (ponto.status_defeito == 'pendente') {
-                status = 'executado'
-            } else { status = 'pendente'}
-
             await this.RegistroRepository.criar(registro, barramento)
-            await this.PontoRepository.mudarStatus(id, status);
+            await this.PontoRepository.executarPonto(id);
 
-            return res.status(200).json({ ponto: { ...ponto, status_defeito: status } });
+            return res.status(200).json({ ponto: { ...ponto, status_defeito: "executado" } });
         }
     }
 
