@@ -7,14 +7,14 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-const port = 3000
+const port = process.env.PORT || 3000 
 
 app.get('/', (req, res) => {
   res.send('Olá Mundo!')
 })
 
 app.listen(port, () => {
-  console.log(`Exemplo de app rodando em http://localhost:${port}`)
+  console.log(`API rodando na porta ${port}`)
 })
 
 app.use('/pontos', PontoRoute)

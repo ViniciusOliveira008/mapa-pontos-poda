@@ -33,7 +33,6 @@
         async mudarStatus(req, res) {
             const { id } = req.params
             const registro = req.body
-            console.log(registro)
 
             const ponto = await this.PontoRepository.encontrarPorId(id); 
             if (!ponto) { 
