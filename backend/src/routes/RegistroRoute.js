@@ -1,10 +1,10 @@
-import RegistroService from "../services/RegistroService";
-import express from 'express' 
-import dbConnection from "../config/db";
-
-const registroService = new RegistroService(dbConnection);
+import RegistroService from "../services/RegistroService.js";
+import express from 'express'
+import dbConnection from "../config/db.js";
 
 const registroRouter = express.Router()
+
+const registroService = new RegistroService(dbConnection);
 
 registroRouter.get('/listar', async (req, res) => registroService.listar(req, res));
 registroRouter.post('/criar', async (req, res) => registroService.criar(req, res));
