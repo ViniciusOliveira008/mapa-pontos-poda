@@ -46,6 +46,7 @@
       inset: 0;
       background: rgba(0,0,0,.5);
       z-index: 2000;
+      backdrop-filter: blur(5px);
     }
 
     #modalExecucao .box {
@@ -53,7 +54,7 @@
       width: 320px;
       margin: 100px auto;
       padding: 20px;
-      border-radius: 8px;
+      border-radius: 12px;
     }
 
     #modalExecucao input,
@@ -80,8 +81,24 @@
   <div class="box">
     <h3>Executar ponto</h3>
 
-    <label>Equipe *</label>
-    <input id="inputEquipe" type="text">
+    <label for="inputEquipe">Equipe *</label> <br>
+    <select id="inputEquipe" style="box-shadow: none; border: 1px solid black; background-color: white;">
+      <option value="CSRPNA0601">CSRPNA0601</option>
+      <option value="CSRPNA0602">CSRPNA0602</option>
+      <option value="CSRPNA0603">CSRPNA0603</option>
+      <option value="CSRPNA0701">CSRPNA0701</option>
+      <option value="CSRPNA0702">CSRPNA0702</option>
+      <option value="CSRPNA0703">CSRPNA0703</option>
+      <option value="CSRPNA0704">CSRPNA0704</option>
+      <option value="CSRPNA0801">CSRPNA0801</option>
+      <option value="CSRPNA0802">CSRPNA0802</option>
+      <option value="CSRPNA1301">CSRPNA1301</option>
+      <option value="CSRPNA1501">CSRPNA1501</option>
+      <option value="CSRPNA1502">CSRPNA1502</option>
+      <option value="CSRPNA1503">CSRPNA1503</option>
+      <option value="CSRPNA1504">CSRPNA1504</option>
+    </select>
+    <br> <br>
 
     <label>Data *</label>
     <input id="inputData" type="date">
@@ -90,8 +107,8 @@
     <textarea id="inputDescricao" rows="3"></textarea>
 
     <div style="text-align:right">
-      <button onclick="fecharModal()">Cancelar</button>
-      <button onclick="confirmarExecucao()" style="background:#28a745;color:#fff;border:none;padding:6px 12px">
+      <button onclick="fecharModal()" style="background:red;color:#fff;border:none;padding:6px 12px;border-radius:4px">Cancelar</button>
+      <button onclick="confirmarExecucao()" style="background:#28a745;color:#fff;border:none;padding:6px 12px;border-radius:4px">
         Confirmar
       </button>
     </div>
@@ -144,7 +161,17 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_ativos')
           <b>OI:</b> ${row.numero_oi}<br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
-          <button onclick="abrirModal(${row.id})">Executar</button>
+          <button onclick="abrirModal(${row.id})" style="
+        background-color:#28a745;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        padding:8px 14px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+        width:100%;"
+        >Executar</button>
         `)
 
       arr.push(marker)
