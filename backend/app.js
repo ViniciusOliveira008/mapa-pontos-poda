@@ -1,5 +1,6 @@
 import express from 'express'
-import PontoRoute from './src/routes/PontoRoute.js'
+import pontoRouter from './src/routes/PontoRoute.js'
+import registroRouter from './src/routes/RegistroRoute.js'
 import cors from 'cors'
 import 'dotenv/config'
 
@@ -17,6 +18,7 @@ app.listen(port, () => {
   console.log(`API rodando na porta ${port}`)
 })
 
-app.use('/pontos', PontoRoute)
+app.use('/pontos', pontoRouter)
+app.use('/registros', registroRouter)
 
 export default app 

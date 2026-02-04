@@ -1,9 +1,14 @@
 import RegistroService from "../services/RegistroService";
 import express from express 
+import dbConnection from "../config/db";
 
-router = express.Router()
+const registroService = new RegistroService(dbConnection);
 
-router.get('/listar', async (req, res) => RegistroService.listar(req, res));
-router.post('/criar', async (req, res) => RegistroService.criar(req, res));
-router.put('/atualizar/:id', async (req, res) => RegistroService.atualizar(req, res));
-router.delete('/deletar/:id', async (req, res) => RegistroService.deletar(req, res));
+const registroRouter = express.Router()
+
+registroRouter.get('/listar', async (req, res) => registroService.listar(req, res));
+registroRouter.post('/criar', async (req, res) => registroService.criar(req, res));
+registroRouter.put('/atualizar/:id', async (req, res) => registroService.atualizar(req, res));
+registroRouter.delete('/deletar/:id', async (req, res) => registroService.deletar(req, res));
+
+export default registroRouter
