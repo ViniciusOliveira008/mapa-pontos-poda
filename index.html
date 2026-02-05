@@ -83,20 +83,20 @@
 
     <label for="inputEquipe">Equipe *</label> <br>
     <select id="inputEquipe" style="box-shadow: none; border: 1px solid black; background-color: white;">
-      <option value="CSRPNA0601">CSRPNA0601</option>
+      <option value="CSRPAR0601">CSRPAR0601</option>
       <option value="CSRSJM0602">CSRSJM0602</option>
-      <option value="CSRPNA0603">CSRPNA0603</option>
-      <option value="CSRPNA0701">CSRPNA0701</option>
-      <option value="CSRPNA0702">CSRPNA0702</option>
-      <option value="CSRPNA0703">CSRPNA0703</option>
-      <option value="CSRPNA0704">CSRPNA0704</option>
-      <option value="CSRPNA0801">CSRPNA0801</option>
-      <option value="CSRPNA0802">CSRPNA0802</option>
-      <option value="CSRPNA1301">CSRPNA1301</option>
-      <option value="CSRPNA1501">CSRPNA1501</option>
-      <option value="CSRPNA1502">CSRPNA1502</option>
+      <option value="CSRPAR0603">CSRPAR0603</option>
+      <option value="CSRPAR0701">CSRPAR0701</option>
+      <option value="CSRPAR0702">CSRPAR0702</option>
+      <option value="CSRPAR0703">CSRPAR0703</option>
+      <option value="CSRPAR0704">CSRPAR0704</option>
+      <option value="CSRPAR0801">CSRPAR0801</option>
+      <option value="CSRPAR0802">CSRPAR0802</option>
+      <option value="CSRPAR1301">CSRPAR1301</option>
+      <option value="CSRPAR1501">CSRPAR1501</option>
+      <option value="CSRPAR1502">CSRPAR1502</option>
       <option value="CSRSJM1503">CSRSJM1503</option>
-      <option value="CSRPNA1504">CSRPNA1504</option>
+      <option value="CSRPAR1504">CSRPAR1504</option>
     </select>
     <br> <br>
 
@@ -209,7 +209,7 @@ function confirmarExecucao(){
     return
   }
 
-  fetch(`https://mapa-pontos-poda.onrender.com/pontos/mudar_status/${pontoSelecionadoId}`,{
+  fetch(`https://mapa-pontos-poda.onrender.com/pontos/executar/${pontoSelecionadoId}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
