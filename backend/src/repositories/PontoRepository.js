@@ -8,9 +8,14 @@ class PontoRepository {
     return rows;
   }
 
-  async listar_ativos() {
+  async listar_pendentes () {
     const [rows] = await this.db.execute("SELECT * FROM pontos WHERE status_defeito = ?", ['pendente'])
     return rows;
+  }
+
+  async listar_executados() {
+    const [rows] = await this.db.execute("SELECT * FROM pontos WHERE status_defeito = ?", ["executado"])
+    return rows 
   }
 
   async criar(ponto) {

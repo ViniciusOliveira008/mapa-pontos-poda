@@ -12,9 +12,14 @@
             res.status(200).json(pontos);
         };
 
-        async listar_ativos(req, res) {
-            const pontos = await this.PontoRepository.listar_ativos();
+        async listar_pendentes(req, res) {
+            const pontos = await this.PontoRepository.listar_pendentes();
             res.status(200).json(pontos);
+        }
+
+        async listar_executados(req, res) {
+            const pontos = await this.PontoRepository.listar_executados();
+            res.status(200).json(pontos)
         }
  
         async criar(req, res) {
