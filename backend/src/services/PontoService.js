@@ -44,6 +44,10 @@
                 return res.status(404).json({ error: 'Ponto não encontrado' });
             }
 
+            if (ponto.status_defeito == "executado") {
+                return res.status(400).json({ error: 'Ponto já executado' });
+            }
+
             const barramento = ponto.barramento
 
             await this.RegistroRepository.criar(registro, barramento)
