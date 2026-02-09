@@ -141,7 +141,7 @@ const btMarkers=[], mtMarkers=[], tiMarkers=[]
 let pontoSelecionadoId = null
 
 /* ===== CARREGAR PONTOS ===== */
-fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_ativos')
+fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
   .then(r=>r.json())
   .then(data=>{
     data.forEach(row=>{
@@ -220,7 +220,11 @@ function confirmarExecucao(){
     })
   })
   .then(r=>{
-    if(!r.ok) throw 'erro'
+    if(r.status===400){
+      throw new Error('BAD_REQUEST')
+    }
+
+    if(!r.ok) throw new Error('ERROR')
     markers.eachLayer(m=>{
       if(m.getPopup()?.getContent().includes(`abrirModal(${pontoSelecionadoId})`)){
         markers.removeLayer(m)
@@ -228,7 +232,13 @@ function confirmarExecucao(){
     })
     fecharModal()
   })
-  .catch(()=>alert('Erro ao executar ponto'))
+  .catch( err => {
+    if(err.message === 'BAD_REQUEST'){
+      alert('Ponto já executado!')
+    }else{
+      alert('Erro ao executar ponto')
+    }
+  })
 }
 
 /* ===== GEOLOCALIZAÇÃO ===== */
