@@ -11,8 +11,52 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; }
-    #map { height: 100%; width: 100%; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      height: 100%; 
+      font-family: Arial, sans-serif; 
+    }
+
+    #map { 
+      height: 100%; 
+      width: 100%; 
+    }
+
+    /* ===== GUIAS TOPO ===== */
+    .top-tabs {
+      position: fixed;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1500;
+      background: rgba(255,255,255,0.95);
+      padding: 6px 14px;
+      border-radius: 30px;
+      box-shadow: 0 3px 8px rgba(0,0,0,.15);
+      display: flex;
+      gap: 10px;
+    }
+
+    .top-tabs .tab {
+      border: none;
+      background: transparent;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all .2s ease;
+      color: #444;
+    }
+
+    .top-tabs .tab:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    .top-tabs .active {
+      background: #007bff;
+      color: #fff;
+    }
 
     .loc-btn {
       position: fixed;
@@ -66,7 +110,15 @@
 </head>
 
 <body>
+
+<!-- GUIAS -->
+<div class="top-tabs">
+  <a href="index.html" class="tab active">Podas</a>
+  <a href="pages/nds.html" class="tab">NDS</a>
+</div>
+
 <div id="map"></div>
+
 <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
 
 <div class="legend">
@@ -81,7 +133,7 @@
   <div class="box">
     <h3>Executar ponto</h3>
 
-    <label for="inputEquipe">Equipe *</label> <br>
+    <label for="inputEquipe">Equipe *</label><br>
     <select id="inputEquipe" style="box-shadow: none; border: 1px solid black; background-color: white;">
       <option value="CSRPAR0601">CSRPAR0601</option>
       <option value="CSRSJM0602">CSRSJM0602</option>
@@ -99,7 +151,6 @@
       <option value="CSRPAR1504">CSRPAR1504</option>
       <option value="CSR_LV_PNA01">CSR_LV_PNA01</option>
     </select>
-    <br> <br>
 
     <label>Data *</label>
     <input id="inputData" type="date">
@@ -120,6 +171,18 @@
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
 <script>
+
+/* ===== TROCAR GUIA ===== */
+function trocarGuia(num){
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.classList.remove('active')
+  })
+  document.querySelectorAll('.tab')[num-1].classList.add('active')
+
+  console.log("Guia ativa:", num)
+  // Aqui depois você pode colocar lógica diferente por guia
+}
+
 /* ===== UTIL ===== */
 const normalize = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
 const toFloat = v => { const n = parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n }
@@ -141,7 +204,6 @@ map.addLayer(markers)
 const btMarkers=[], mtMarkers=[], tiMarkers=[]
 let pontoSelecionadoId = null
 
-/* ===== CARREGAR PONTOS ===== */
 fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
   .then(r=>r.json())
   .then(data=>{
@@ -163,16 +225,16 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
           <button onclick="abrirModal(${row.id})" style="
-        background-color:#28a745;
-        color:#fff;
-        border:none;
-        border-radius:6px;
-        padding:8px 14px;
-        font-size:14px;
-        font-weight:600;
-        cursor:pointer;
-        width:100%;"
-        >Executar</button>
+            background-color:#28a745;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            padding:8px 14px;
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            width:100%;"
+          >Executar</button>
         `)
 
       arr.push(marker)
@@ -180,13 +242,11 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
     })
   })
 
-/* ===== FILTROS ===== */
 const update = (arr,show)=>arr.forEach(m=>show?markers.addLayer(m):markers.removeLayer(m))
 chkBT.onchange=e=>update(btMarkers,e.target.checked)
 chkMT.onchange=e=>update(mtMarkers,e.target.checked)
 chkTI.onchange=e=>update(tiMarkers,e.target.checked)
 
-/* ===== MODAL ===== */
 function abrirModal(id){
   pontoSelecionadoId=id
   inputEquipe.value=''
@@ -200,7 +260,6 @@ function fecharModal(){
   pontoSelecionadoId=null
 }
 
-/* ===== CONFIRMAR EXECUÇÃO ===== */
 function confirmarExecucao(){
   const equipe=inputEquipe.value.trim()
   const data=inputData.value
@@ -221,19 +280,18 @@ function confirmarExecucao(){
     })
   })
   .then(r=>{
-    if(r.status===400){
-      throw new Error('BAD_REQUEST')
-    }
-
+    if(r.status===400) throw new Error('BAD_REQUEST')
     if(!r.ok) throw new Error('ERROR')
+
     markers.eachLayer(m=>{
       if(m.getPopup()?.getContent().includes(`abrirModal(${pontoSelecionadoId})`)){
         markers.removeLayer(m)
       }
     })
+
     fecharModal()
   })
-  .catch( err => {
+  .catch(err=>{
     if(err.message === 'BAD_REQUEST'){
       alert('Ponto já executado!')
     }else{
@@ -242,7 +300,6 @@ function confirmarExecucao(){
   })
 }
 
-/* ===== GEOLOCALIZAÇÃO ===== */
 let userLat,userLon,userMarker
 navigator.geolocation?.getCurrentPosition(p=>{
   userLat=p.coords.latitude
@@ -255,6 +312,7 @@ function goToLocation(){
     map.setView([userLat,userLon],16)
   }
 }
+
 </script>
 </body>
 </html>
