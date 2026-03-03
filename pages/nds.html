@@ -71,18 +71,6 @@
       cursor: pointer;
     }
 
-    .legend {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,.3);
-      z-index: 999;
-      font-size: 14px;
-    }
-
     /* ===== MODAL ===== */
     #modalExecucao {
       display: none;
@@ -114,19 +102,12 @@
 <!-- GUIAS -->
 <div class="top-tabs">
   <a href="../index.html" class="tab">Podas</a>
-  <a href="pages/nds.html" class="tab active">NDS</a>
+  <a href="" class="tab active">NDS</a>
 </div>
 
 <div id="map"></div>
 
 <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
-
-<div class="legend">
-  <strong>Legenda</strong><br>
-  <input type="checkbox" id="chkBT" checked> Poda BT<br>
-  <input type="checkbox" id="chkMT" checked> Poda MT<br>
-  <input type="checkbox" id="chkTI" checked> Trocar Isolador
-</div>
 
 <!-- ===== MODAL EXECUÇÃO ===== -->
 <div id="modalExecucao">
@@ -211,11 +192,11 @@ fetch('https://mapa-pontos-poda.onrender.com/nds/listar_pendentes')
       const lon = toFloat(row.longitude)
       if(!lat||!lon) return
 
-      let icon, arr
+      let icon
 
-      const marker = L.marker([lat,lon],{icon})
+      const marker = L.marker([lat,lon],{icon:icons.red})
         .bindPopup(`
-          <b>OI:</b> ${row.numero_oi}<br>
+          <b>NDS:</b> ${row.numero_nds}<br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
           <button onclick="abrirModal(${row.id})" style="
@@ -231,7 +212,7 @@ fetch('https://mapa-pontos-poda.onrender.com/nds/listar_pendentes')
           >Executar</button>
         `)
 
-      arr.push(marker)
+        markers.addLayer(marker)
     })
   })
 
