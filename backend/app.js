@@ -3,6 +3,7 @@ import pontoRouter from './src/routes/PontoRoute.js'
 import registroRouter from './src/routes/RegistroRoute.js'
 import cors from 'cors'
 import 'dotenv/config'
+import ndsRouter from './src/routes/NdsRoute.js'
 
 const app = express()
 app.use(express.json())
@@ -20,5 +21,6 @@ app.listen(port, () => {
 
 app.use('/pontos', pontoRouter)
 app.use('/registros', registroRouter)
+app.use('/nds', ndsRouter)
 
 export default app 
