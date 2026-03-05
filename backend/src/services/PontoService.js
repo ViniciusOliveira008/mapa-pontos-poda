@@ -50,7 +50,7 @@
 
             const barramento = ponto.barramento
 
-            await this.RegistroRepository.criar(registro, barramento)
+            await this.RegistroRepository.criar(registro, barramento, 'manutencao')
             await this.PontoRepository.executarPonto(id);
 
             return res.status(200).json({ ponto: { ...ponto, status_defeito: "executado" } });

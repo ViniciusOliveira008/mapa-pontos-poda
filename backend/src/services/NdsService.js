@@ -53,7 +53,7 @@ class NdsService {
 
         const barramento = nds.barramento;
 
-        await this.RegistroRepository.criar(registro, barramento);
+        await this.RegistroRepository.criar(registro, barramento, 'nds');
         await this.NdsRepository.executarNds(id);
 
         return res.status(200).json({
