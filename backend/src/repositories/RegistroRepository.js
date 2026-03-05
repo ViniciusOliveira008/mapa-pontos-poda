@@ -4,14 +4,25 @@ class RegistroRepository {
     }
 
     async listar() {
-        const [rows] = await this.db.execute('SELECT * FROM registros');
+        const [rows] = await this.db.execute(
+            'SELECT * FROM registros'
+        );
         return rows;
     }
 
     async criar(registro, barramento) {
         const [result] = await this.db.execute(
-            'INSERT INTO registros (data_execucao, descricao, equipe, id_ponto, barramento) VALUES (?, ?, ?, ?, ?)',
-            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto, barramento]
+            `INSERT INTO registros 
+            (data_execucao, descricao, equipe, id_ponto, barramento, tipo_registro) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                registro.data_execucao,
+                registro.descricao,
+                registro.equipe,
+                registro.id_ponto,
+                barramento,
+                registro.tipo_registro
+            ]
         );
         return result.insertId;
     }
@@ -26,8 +37,23 @@ class RegistroRepository {
 
     async atualizar(id, registro) {
         await this.db.execute(
-            'UPDATE registros SET data_execucao = ?, descricao = ?, equipe = ?, id_ponto = ?, barramento = ? WHERE id = ?',
-            [registro.data_execucao, registro.descricao, registro.equipe, registro.id_ponto, registro.barramento, id]
+            `UPDATE registros 
+             SET data_execucao = ?, 
+                 descricao = ?, 
+                 equipe = ?, 
+                 id_ponto = ?, 
+                 barramento = ?, 
+                 tipo_registro = ?
+             WHERE id = ?`,
+            [
+                registro.data_execucao,
+                registro.descricao,
+                registro.equipe,
+                registro.id_ponto,
+                registro.barramento,
+                registro.tipo_registro,
+                id
+            ]
         );
     }
 
