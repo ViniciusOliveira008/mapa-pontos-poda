@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registros</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      margin: 0;
+    }
+
+    .filtro-container {
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .filtro-container label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .filtro-container select {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .container-nds {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .card h3 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      color: #1e293b;
+    }
+
+    .card p {
+      margin: 6px 0;
+      font-size: 14px;
+      color: #475569;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .badge.nds {
+      background: #2563eb;
+    }
+
+    .badge.manutencao {
+      background: #16a34a;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="filtro-container">
+    <label for="filtroTipo">Filtrar por tipo:</label>
+    <select id="filtroTipo">
+      <option value="todos">Todos</option>
+      <option value="nds">NDS</option>
+      <option value="manutencao">Manutenção</option>
+    </select>
+
+    <label for="ordenarId">Ordenar por:</label>
+    <select id="ordenarId">
+      <option value="desc">Mais recente</option>
+      <option value="asc">Mais antigo</option>
+    </select>
+  </div>
+
+  <div id="lista-nds" class="container-nds"></div>
+
+  <script>
+    let todosRegistros = [];
+    let tipoAtual = "todos";
+    let ordemAtual = "desc";
+
+    fetch("https://mapa-pontos-poda.onrender.com/registros/listar")
+      .then(r => r.json())
+      .then(data => {
+        todosRegistros = data;
+        aplicarFiltros();
+      });
+
+    function formatarData(dataISO) {
+      if (!dataISO) return "-";
+      const data = new Date(dataISO);
+      return data.toLocaleDateString("pt-BR");
+    }
+
+    function aplicarFiltros() {
+      let lista = [...todosRegistros];
+
+      // 🔹 Filtro por tipo
+      if (tipoAtual !== "todos") {
+        lista = lista.filter(r => r.tipo_registro === tipoAtual);
+      }
+
+      // 🔹 Ordenação por ID
+      lista.sort((a, b) => {
+        return ordemAtual === "asc"
+          ? a.id - b.id   // menor primeiro
+          : b.id - a.id;  // maior primeiro
+      });
+
+      renderizar(lista);
+    }
+
+    function renderizar(lista) {
+      const container = document.getElementById("lista-nds");
+      container.innerHTML = "";
+
+      lista.forEach(row => {
+        container.innerHTML += `
+          <div class="card">
+            <h3>Registro ${row.id}</h3>
+
+            <p><span class="label">📍 Ponto:</span> ${row.id_ponto}</p>
+            <p><span class="label">👷 Equipe:</span> ${row.equipe}</p>
+            <p><span class="label">📅 Execução:</span> ${formatarData(row.data_execucao)}</p>
+            <p><span class="label">📝 Descrição:</span> ${row.descricao}</p>
+            <p><span class="label">🔌 Barramento:</span> ${row.barramento}</p>
+
+            ${
+              row.numero_nds
+                ? `<p><span class="label">🔢 Nº NDS:</span> ${row.numero_nds}</p>`
+                : ""
+            }
+
+            <p>
+              <span class="label">Tipo:</span>
+              <span class="badge ${row.tipo_registro}">
+                ${row.tipo_registro.toUpperCase()}
+              </span>
+            </p>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById("filtroTipo")
+      .addEventListener("change", function () {
+        tipoAtual = this.value;
+        aplicarFiltros();
+      });
+
+    document.getElementById("ordenarId")
+      .addEventListener("change", function () {
+        ordemAtual = this.value;
+        aplicarFiltros();
+      });
+  </script>
+
+</body>
+</html>
