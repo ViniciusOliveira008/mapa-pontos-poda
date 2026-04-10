@@ -35,11 +35,14 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
       else if(s.includes('trocar isolador')){icon=icons.blue;arr=tiMarkers}
       else return
 
-      const marker = L.marker([lat,lon],{icon})
-        .bindPopup(`
-          <b>OI:</b> ${row.numero_oi}<br>
+      const isManual = Number(row.manual) === 1
+
+      const popupContent = isManual 
+        ? `
+          <b>Ponto manual</b><br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
+
           <button onclick="abrirModal(${row.id})" style="
             background-color:#28a745;
             color:#fff;
@@ -50,8 +53,32 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
             font-weight:600;
             cursor:pointer;
             width:100%;"
-          >Executar</button>
-        `)
+          >
+            Executar
+          </button>
+        `
+        : `
+          <b>OI:</b> ${row.numero_oi}<br>
+          <b>Barramento:</b> ${row.barramento}<br>
+          <b>Serviço:</b> ${row.servico}<br><br>
+
+          <button onclick="abrirModal(${row.id})" style="
+            background-color:#28a745;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            padding:8px 14px;
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            width:100%;"
+          >
+            Executar
+          </button>
+        `
+
+      const marker = L.marker([lat,lon],{icon})
+        .bindPopup(popupContent)
 
       arr.push(marker)
       markers.addLayer(marker)
@@ -209,7 +236,7 @@ map.on('click', function(e){
     })
   })
   .then(r => r.json())
-  .then(() => {
+  .then(data => {
 
     const marker = L.marker([lat, lng], {
       icon: servicoInfo.icon
@@ -217,7 +244,20 @@ map.on('click', function(e){
       <b>Ponto manual</b><br>
       <b>Barramento:</b> ${barramento}<br>
       <b>Serviço:</b> ${servicoInfo.tipo}<br>
-      ${descricao}
+      ${descricao ? descricao + '<br><br>' : '<br>'}
+
+      <button onclick="abrirModal(${data.id_ponto})" style="
+        background-color:#28a745;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        padding:8px 14px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+        width:100%;">
+        Executar
+      </button>
     `)
 
     markers.addLayer(marker)
@@ -230,27 +270,3 @@ map.on('click', function(e){
     alert('Erro ao salvar ponto')
   })
 })
-
-fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_manuais')
-  .then(r => r.json())
-  .then(data => {
-
-    data.forEach(p => {
-
-      const servicoInfo = identificarServico(p.servico)
-
-      if (!servicoInfo) return
-
-      const marker = L.marker([p.latitude, p.longitude], {
-        icon: servicoInfo.icon
-      }).bindPopup(`
-        <b>Ponto manual</b><br>
-        <b>Barramento:</b> ${p.barramento}<br>
-        <b>Serviço:</b> ${servicoInfo.tipo}<br>
-        ${p.descricao || ''}
-      `)
-
-      markers.addLayer(marker)
-    })
-
-  })
