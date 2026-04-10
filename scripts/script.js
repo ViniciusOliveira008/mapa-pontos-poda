@@ -1,3 +1,6 @@
+let coordMode = false
+let coordMarker = null
+
 const normalize = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
 const toFloat = v => { const n = parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n }
 
@@ -125,3 +128,74 @@ function goToLocation(){
     map.setView([userLat,userLon],16)
   }
 }
+
+function toggleCoordMode(){
+  coordMode = !coordMode
+
+  alert(coordMode 
+    ? 'Modo de coordenadas ATIVADO. Clique no mapa.'
+    : 'Modo de coordenadas DESATIVADO.'
+  )
+}
+
+map.on('click', function(e){
+  if(!coordMode) return
+
+  const lat = e.latlng.lat
+  const lng = e.latlng.lng
+
+  const barramento = prompt('Barramento:')
+  if(!barramento) return
+
+  const servico = prompt('Tipo de serviço (BT, MT, TI):') || ''
+  const descricao = prompt('Descrição (opcional):') || ''
+
+  fetch('https://mapa-pontos-poda.onrender.com/pontos/criar_manual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      latitude: lat,
+      longitude: lng,
+      barramento,
+      servico,
+      descricao
+    })
+  })
+  .then(r => r.json())
+  .then(() => {
+
+    const marker = L.marker([lat, lng], {
+      icon: icons.manual || icons.blue
+    }).bindPopup(`
+      <b>Ponto manual</b><br>
+      <b>Barramento:</b> ${barramento}<br>
+      <b>Serviço:</b> ${servico}<br>
+      ${descricao}
+    `)
+
+    markers.addLayer(marker)
+  })
+  .catch(() => {
+    alert('Erro ao salvar ponto')
+  })
+})
+
+fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_manuais')
+  .then(r => r.json())
+  .then(data => {
+
+    data.forEach(p => {
+
+      const marker = L.marker([p.latitude, p.longitude], {
+        icon: icons.manual || icons.blue
+      }).bindPopup(`
+        <b>Ponto manual</b><br>
+        <b>Barramento:</b> ${p.barramento}<br>
+        <b>Serviço:</b> ${p.servico || '-'}<br>
+        ${p.descricao || ''}
+      `)
+
+      markers.addLayer(marker)
+    })
+
+  })

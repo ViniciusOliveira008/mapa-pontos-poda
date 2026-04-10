@@ -12,5 +12,7 @@ pontoRouter.get('/listar_executados', async (req, res) => pontoService.listar_ex
 pontoRouter.post('/criar', async (req, res) => pontoService.criar(req, res));
 pontoRouter.put('/atualizar/:id', async (req, res) => pontoService.atualizar(req, res));
 pontoRouter.post('/executar/:id', async (req, res) => pontoService.executarPonto(req, res));
+pontoRouter.post('/criar_manual', async (req, res) => pontoService.criarManual(req, res));
+pontoRouter.get('/listar_manuais', async (req, res) => pontoService.listar_manuais(req, res));
 
 export default pontoRouter;

@@ -34,3 +34,16 @@ CREATE TABLE IF NOT EXISTS nds (
     longitude DECIMAL(11, 8) NOT NULL,
     status_defeito ENUM('executado', 'pendente') NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS pontos_manuais (
+    id INT AUTO_INCREMENT NOT NULL,
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
+    barramento VARCHAR(100) NOT NULL,
+    servico VARCHAR(100) NOT NULL,
+    status_defeito ENUM('executado', 'pendente') NOT NULL,
+
+    PRIMARY KEY (id)
+
+ALTER TABLE pontos MODIFY id INT NOT NULL AUTO_INCREMENT;
+);
