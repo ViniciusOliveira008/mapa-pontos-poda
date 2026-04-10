@@ -138,6 +138,45 @@ function toggleCoordMode(){
   )
 }
 
+function identificarServico(servicoInput) {
+  const s = normalize(servicoInput)
+
+  if (
+    s.includes('bt') ||
+    s.includes('poda bt') ||
+    s.includes('poda de bt')
+  ) {
+    return {
+      tipo: 'Poda de BT',
+      icon: icons.green
+    }
+  }
+
+  if (
+    s.includes('mt') ||
+    s.includes('poda mt') ||
+    s.includes('poda de mt')
+  ) {
+    return {
+      tipo: 'Poda de MT',
+      icon: icons.red
+    }
+  }
+
+  if (
+    s.includes('ti') ||
+    s.includes('isolador') ||
+    s.includes('trocar isolador')
+  ) {
+    return {
+      tipo: 'Trocar Isolador',
+      icon: icons.blue
+    }
+  }
+
+  return null
+}
+
 map.on('click', function(e){
   if(!coordMode) return
 
@@ -147,8 +186,16 @@ map.on('click', function(e){
   const barramento = prompt('Barramento:')
   if(!barramento) return
 
-  const servico = prompt('Tipo de serviço (BT, MT, TI):') || ''
+  const servicoInput = prompt('Tipo de serviço (BT, MT, TI):') || ''
   const descricao = prompt('Descrição (opcional):') || ''
+
+  const servicoInfo = identificarServico(servicoInput)
+
+  if (!servicoInfo) {
+    alert('Serviço inválido! Use BT, MT ou TI')
+    return
+  }
+
 
   fetch('https://mapa-pontos-poda.onrender.com/pontos/criar_manual', {
     method: 'POST',
@@ -157,7 +204,7 @@ map.on('click', function(e){
       latitude: lat,
       longitude: lng,
       barramento,
-      servico,
+      servico: servicoInfo.tipo,
       descricao
     })
   })
@@ -165,11 +212,11 @@ map.on('click', function(e){
   .then(() => {
 
     const marker = L.marker([lat, lng], {
-      icon: icons.manual || icons.blue
+      icon: servicoInfo.icon
     }).bindPopup(`
       <b>Ponto manual</b><br>
       <b>Barramento:</b> ${barramento}<br>
-      <b>Serviço:</b> ${servico}<br>
+      <b>Serviço:</b> ${servicoInfo.tipo}<br>
       ${descricao}
     `)
 
@@ -186,12 +233,16 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_manuais')
 
     data.forEach(p => {
 
+      const servicoInfo = identificarServico(p.servico)
+
+      if (!servicoInfo) return
+
       const marker = L.marker([p.latitude, p.longitude], {
-        icon: icons.manual || icons.blue
+        icon: servicoInfo.icon
       }).bindPopup(`
         <b>Ponto manual</b><br>
         <b>Barramento:</b> ${p.barramento}<br>
-        <b>Serviço:</b> ${p.servico || '-'}<br>
+        <b>Serviço:</b> ${servicoInfo.tipo}<br>
         ${p.descricao || ''}
       `)
 
