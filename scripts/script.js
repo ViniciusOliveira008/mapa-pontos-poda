@@ -221,6 +221,10 @@ map.on('click', function(e){
     `)
 
     markers.addLayer(marker)
+
+    //desativa o modo coordenadas depois da criação do ponto
+    coordMode = false
+    alert('Ponto criado! Modo de coordenadas desativado.')
   })
   .catch(() => {
     alert('Erro ao salvar ponto')
