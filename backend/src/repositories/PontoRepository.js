@@ -65,14 +65,15 @@ class PontoRepository {
   };
 
   async criarManual(ponto) {
-    const { latitude, longitude, barramento, servico, status_defeito} = ponto;
+    const { latitude, longitude, barramento, servico, status_defeito, manual} = ponto;
 
     console.log("VALORES:", {
       latitude,
       longitude,
       barramento,
       servico,
-      status_defeito
+      status_defeito,
+      manual
     });
 
     // 1️⃣ Insere em pontos_manuais
