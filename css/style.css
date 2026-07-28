@@ -59,9 +59,23 @@ body {
   cursor: pointer;
 }
 
+.coord-btn {
+  position: fixed;
+  bottom: 80px; /* acima do botão de localização */
+  right: 20px;
+  z-index: 1000;
+  background: #28a745; /* verde pra diferenciar */
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .legend {
   position: fixed;
-  bottom: 80px;
+  bottom: 140px;
   right: 20px;
   background: #fff;
   padding: 10px;

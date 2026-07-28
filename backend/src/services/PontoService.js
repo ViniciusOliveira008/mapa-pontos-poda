@@ -55,6 +55,36 @@
 
             return res.status(200).json({ ponto: { ...ponto, status_defeito: "executado" } });
         }
+
+        async criarManual(req, res) {
+            try {
+                const { latitude, longitude, barramento, servico, descricao } = req.body;
+
+                if (!latitude || !longitude || !barramento) {
+                    return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+                }
+
+                const id = await this.PontoRepository.criarManual({
+                    latitude,
+                    longitude,
+                    barramento,
+                    servico,
+                    status_defeito: "pendente"
+                });
+
+                return res.status(201).json({ id });
+
+            } catch (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Erro ao criar ponto manual' });
+            }
+        }
+
+        async listar_manuais(req, res) {
+            const pontos = await this.PontoRepository.listarManuais();
+            res.status(200).json(pontos);
+        }
+
     }
 
     export default PontoService;

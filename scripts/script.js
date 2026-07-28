@@ -1,3 +1,6 @@
+let coordMode = false
+let coordMarker = null
+
 const normalize = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
 const toFloat = v => { const n = parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n }
 
@@ -32,11 +35,14 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
       else if(s.includes('trocar isolador')){icon=icons.blue;arr=tiMarkers}
       else return
 
-      const marker = L.marker([lat,lon],{icon})
-        .bindPopup(`
-          <b>OI:</b> ${row.numero_oi}<br>
+      const isManual = Number(row.manual) === 1
+
+      const popupContent = isManual 
+        ? `
+          <b>Ponto manual</b><br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
+
           <button onclick="abrirModal(${row.id})" style="
             background-color:#28a745;
             color:#fff;
@@ -47,8 +53,32 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
             font-weight:600;
             cursor:pointer;
             width:100%;"
-          >Executar</button>
-        `)
+          >
+            Executar
+          </button>
+        `
+        : `
+          <b>OI:</b> ${row.numero_oi}<br>
+          <b>Barramento:</b> ${row.barramento}<br>
+          <b>Serviço:</b> ${row.servico}<br><br>
+
+          <button onclick="abrirModal(${row.id})" style="
+            background-color:#28a745;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            padding:8px 14px;
+            font-size:14px;
+            font-weight:600;
+            cursor:pointer;
+            width:100%;"
+          >
+            Executar
+          </button>
+        `
+
+      const marker = L.marker([lat,lon],{icon})
+        .bindPopup(popupContent)
 
       arr.push(marker)
       markers.addLayer(marker)
@@ -125,3 +155,118 @@ function goToLocation(){
     map.setView([userLat,userLon],16)
   }
 }
+
+function toggleCoordMode(){
+  coordMode = !coordMode
+
+  alert(coordMode 
+    ? 'Modo de coordenadas ATIVADO. Clique no mapa.'
+    : 'Modo de coordenadas DESATIVADO.'
+  )
+}
+
+function identificarServico(servicoInput) {
+  const s = normalize(servicoInput)
+
+  if (
+    s.includes('bt') ||
+    s.includes('poda bt') ||
+    s.includes('poda de bt')
+  ) {
+    return {
+      tipo: 'Poda de BT',
+      icon: icons.green
+    }
+  }
+
+  if (
+    s.includes('mt') ||
+    s.includes('poda mt') ||
+    s.includes('poda de mt')
+  ) {
+    return {
+      tipo: 'Poda de MT',
+      icon: icons.red
+    }
+  }
+
+  if (
+    s.includes('ti') ||
+    s.includes('isolador') ||
+    s.includes('trocar isolador')
+  ) {
+    return {
+      tipo: 'Trocar Isolador',
+      icon: icons.blue
+    }
+  }
+
+  return null
+}
+
+map.on('click', function(e){
+  if(!coordMode) return
+
+  const lat = e.latlng.lat
+  const lng = e.latlng.lng
+
+  const barramento = prompt('Barramento:')
+  if(!barramento) return
+
+  const servicoInput = prompt('Tipo de serviço (BT, MT, TI):') || ''
+  const descricao = prompt('Descrição (opcional):') || ''
+
+  const servicoInfo = identificarServico(servicoInput)
+
+  if (!servicoInfo) {
+    alert('Serviço inválido! Use BT, MT ou TI')
+    return
+  }
+
+
+  fetch('https://mapa-pontos-poda.onrender.com/pontos/criar_manual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      latitude: lat,
+      longitude: lng,
+      barramento,
+      servico: servicoInfo.tipo,
+      descricao
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+
+    const marker = L.marker([lat, lng], {
+      icon: servicoInfo.icon
+    }).bindPopup(`
+      <b>Ponto manual</b><br>
+      <b>Barramento:</b> ${barramento}<br>
+      <b>Serviço:</b> ${servicoInfo.tipo}<br>
+      ${descricao ? descricao + '<br><br>' : '<br>'}
+
+      <button onclick="abrirModal(${data.id_ponto})" style="
+        background-color:#28a745;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        padding:8px 14px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+        width:100%;">
+        Executar
+      </button>
+    `)
+
+    markers.addLayer(marker)
+
+    //desativa o modo coordenadas depois da criação do ponto
+    coordMode = false
+    alert('Ponto criado! Modo de coordenadas desativado.')
+  })
+  .catch(() => {
+    alert('Erro ao salvar ponto')
+  })
+})
