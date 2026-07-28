@@ -11,8 +11,26 @@
 
     function formatarData(dataISO) {
       if (!dataISO) return "-";
-      const data = new Date(dataISO);
-      return data.toLocaleDateString("pt-BR");
+
+      // Normaliza separadores (aceita 2026.08.27 ou 2026-08-27)
+      const normalized = String(dataISO).replace(/\./g, "-");
+
+      // Se vier como "dataT00:00:00Z" (apenas data com meia-noite UTC)
+      // tratamos como "data pura" para evitar deslocamento por fuso horário
+      if (normalized.includes("T")) {
+        const [datePart, timePart = ""] = normalized.split("T");
+        const timeOnly = timePart.replace(/Z$/i, "");
+        if (/^00:00(:00)?$/.test(timeOnly) || /^00:00/.test(timeOnly)) {
+          const [year, month, day] = datePart.split("-");
+          if (!year || !month || !day) return "-";
+          return `${day}/${month}/${year}`;
+        }
+      }
+
+      // Fallback: usa Date e formata no locale (para casos com horário significativo)
+      const d = new Date(dataISO);
+      if (isNaN(d)) return "-";
+      return d.toLocaleDateString("pt-BR");
     }
 
     function aplicarFiltros() {
