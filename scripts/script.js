@@ -4,6 +4,9 @@ let coordMarker = null
 const normalize = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
 const toFloat = v => { const n = parseFloat(String(v).replace(',','.')); return isNaN(n)?null:n }
 
+// flag simples para evitar re-submits
+let isSubmitting = false
+
 const map = L.map('map').setView([-5.9,-35.29],12)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map)
 
@@ -95,6 +98,9 @@ function abrirModal(id){
   inputEquipe.value=''
   inputData.value=''
   inputDescricao.value=''
+  // garantir botão habilitado ao abrir o modal (procura pelo botão que chama confirmarExecucao)
+  const btn = document.querySelector('button[onclick="confirmarExecucao()"]')
+  if(btn){ btn.disabled = false; btn.textContent = 'Confirmar' }
   modalExecucao.style.display='block'
 }
 
@@ -104,6 +110,7 @@ function fecharModal(){
 }
 
 function confirmarExecucao(){
+  if(isSubmitting) return // já estamos enviando
   const equipe=inputEquipe.value.trim()
   const data=inputData.value
 
@@ -111,6 +118,11 @@ function confirmarExecucao(){
     alert('Equipe e data são obrigatórios')
     return
   }
+
+  // desabilita o botão e marca envio em andamento
+  const btn = document.querySelector('button[onclick="confirmarExecucao()"]')
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando...' }
+  isSubmitting = true
 
   fetch(`https://mapa-pontos-poda.onrender.com/pontos/executar/${pontoSelecionadoId}`,{
     method:'POST',
@@ -132,14 +144,24 @@ function confirmarExecucao(){
       }
     })
 
+    // limpar inputs (UX) e fechar modal
+    inputEquipe.value = ''
+    inputData.value = ''
+    inputDescricao.value = ''
     fecharModal()
   })
   .catch(err=>{
     if(err.message === 'BAD_REQUEST'){
       alert('Ponto já executado!')
+      fecharModal()
     }else{
       alert('Erro ao executar ponto')
+      // reabilitar botão para tentar novamente
+      if(btn){ btn.disabled = false; btn.textContent = 'Confirmar' }
     }
+  })
+  .finally(()=>{
+    isSubmitting = false
   })
 }
 
