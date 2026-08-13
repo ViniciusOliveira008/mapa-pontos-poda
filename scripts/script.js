@@ -17,15 +17,6 @@ const icons = {
   user: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',iconSize:[32,32]})
 }
 
-// cria um ícone em HTML usado para mostrar ⚡ acima do ponto
-const createVivaIcon = () => L.divIcon({
-  // aumento do tamanho do emoji e ajuste da posição para ficar acima do marcador
-  html: '<div style="font-size:28px; transform:translateY(-40px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
-  className: '',
-  iconSize: [28,28],
-  iconAnchor: [14,40]
-})
-
 const markers = L.markerClusterGroup()
 map.addLayer(markers)
 
@@ -98,12 +89,15 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
       arr.push(marker)
       markers.addLayer(marker)
 
-      // se for VIVA, adiciona um marcador apenas com o emoji acima (não interativo)
+      // se for VIVA, adiciona um tooltip com o emoji acima do marcador (não é um ponto separado)
       if(isViva){
-        const vivaMarker = L.marker([lat,lon],{icon:createVivaIcon(), interactive:false})
-        markers.addLayer(vivaMarker)
-        // guarda referência para remoção posterior quando o ponto for executado
-        marker._vivaLayer = vivaMarker
+        // usamos um tooltip permanente posicionado acima do marcador com um pouco de deslocamento
+        marker.bindTooltip(
+          '<div style="font-size:28px; transform:translateY(-6px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
+          {permanent: true, direction: 'top', interactive: false, className: ''}
+        )
+        // marca para referência posterior (remoção quando executado)
+        marker._hasViva = true
       }
     })
   })
@@ -161,8 +155,11 @@ function confirmarExecucao(){
     markers.eachLayer(m=>{
       if(m.getPopup()?.getContent().includes(`abrirModal(${pontoSelecionadoId})`)){
         markers.removeLayer(m)
-        // se esse marcador tinha um layer "viva" associado, remover também
-        if(m._vivaLayer) markers.removeLayer(m._vivaLayer)
+        // se esse marcador tinha um tooltip "viva" associado, não precisamos remover nada separado: ao remover o marcador o tooltip some junto
+        // mantemos a flag para clareza
+        if(m._hasViva) {
+          // nada extra para fazer; placeholder caso precisemos rodar lógica adicional
+        }
       }
     })
 
