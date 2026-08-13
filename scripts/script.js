@@ -17,6 +17,26 @@ const icons = {
   user: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',iconSize:[32,32]})
 }
 
+// estilos dinâmicos para o tooltip VIVA — injetamos via JS pra não depender de CSS externo
+const _vivaStyle = document.createElement('style')
+_vivaStyle.innerHTML = `
+.viva-tooltip {
+  /* bloco branco único (aplica ao container do Leaflet) */
+  background: #fff !important;
+  color: #000 !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+  font-size: 26px !important; /* emoji maior */
+  line-height: 1 !important;
+}
+/* remove a flecha padrão do Leaflet (o "triângulo") */
+.viva-tooltip.leaflet-tooltip::before { display: none !important; }
+/* evita que o tooltip tenha background duplo por classes globais do Leaflet */
+.viva-tooltip { border: none !important; }
+`
+document.head.appendChild(_vivaStyle)
+
 const markers = L.markerClusterGroup()
 map.addLayer(markers)
 
@@ -91,10 +111,10 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
 
       // se for VIVA, adiciona um tooltip com o emoji acima do marcador (não é um ponto separado)
       if(isViva){
-        // renderizamos o emoji dentro de um pequeno bloco branco (estilizado inline) e posicionamos um pouco acima
+        // O conteúdo é só o emoji; o estilo (fundo branco único) vem da classe viva-tooltip injetada acima
         marker.bindTooltip(
-          '<div class="viva-tooltip-inner" style="display:inline-block;background:#fff;padding:2px 6px;border-radius:6px;font-size:18px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.25);transform:translateY(-8px)">⚡</div>',
-          {permanent: true, direction: 'top', interactive: false, offset: [0, -34], className: 'viva-tooltip'}
+          '⚡',
+          {permanent: true, direction: 'top', interactive: false, offset: [0, -36], className: 'viva-tooltip'}
         )
         // marca para referência posterior (remoção quando executado)
         marker._hasViva = true
