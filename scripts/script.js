@@ -91,10 +91,10 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
 
       // se for VIVA, adiciona um tooltip com o emoji acima do marcador (não é um ponto separado)
       if(isViva){
-        // usamos um tooltip permanente posicionado acima do marcador com um pouco de deslocamento
+        // renderizamos o emoji dentro de um pequeno bloco branco (estilizado inline) e posicionamos um pouco acima
         marker.bindTooltip(
-          '<div style="font-size:28px; transform:translateY(-6px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
-          {permanent: true, direction: 'top', interactive: false, className: ''}
+          '<div style="display:inline-block;background:#fff;padding:4px 6px;border-radius:8px;font-size:20px;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,0.25)">⚡</div>',
+          {permanent: true, direction: 'top', interactive: false, offset: [0, -18], className: 'viva-tooltip'}
         )
         // marca para referência posterior (remoção quando executado)
         marker._hasViva = true
