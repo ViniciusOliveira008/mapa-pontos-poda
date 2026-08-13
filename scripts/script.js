@@ -19,10 +19,11 @@ const icons = {
 
 // cria um ícone em HTML usado para mostrar ⚡ acima do ponto
 const createVivaIcon = () => L.divIcon({
-  html: '<div style="font-size:18px; transform:translateY(-28px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
+  // aumento do tamanho do emoji e ajuste da posição para ficar acima do marcador
+  html: '<div style="font-size:28px; transform:translateY(-40px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
   className: '',
-  iconSize: [20,20],
-  iconAnchor: [10,30]
+  iconSize: [28,28],
+  iconAnchor: [14,40]
 })
 
 const markers = L.markerClusterGroup()
