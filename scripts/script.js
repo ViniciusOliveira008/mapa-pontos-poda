@@ -17,6 +17,14 @@ const icons = {
   user: L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',iconSize:[32,32]})
 }
 
+// cria um ícone em HTML usado para mostrar ⚡ acima do ponto
+const createVivaIcon = () => L.divIcon({
+  html: '<div style="font-size:18px; transform:translateY(-28px); text-align:center; line-height:0; filter:drop-shadow(0 0 2px rgba(0,0,0,0.45))">⚡</div>',
+  className: '',
+  iconSize: [20,20],
+  iconAnchor: [10,30]
+})
+
 const markers = L.markerClusterGroup()
 map.addLayer(markers)
 
@@ -80,11 +88,22 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
           </button>
         `
 
+      // verifica se detalhes indicam VIVA
+      const isViva = normalize(row.detalhes) === 'viva'
+
       const marker = L.marker([lat,lon],{icon})
         .bindPopup(popupContent)
 
       arr.push(marker)
       markers.addLayer(marker)
+
+      // se for VIVA, adiciona um marcador apenas com o emoji acima (não interativo)
+      if(isViva){
+        const vivaMarker = L.marker([lat,lon],{icon:createVivaIcon(), interactive:false})
+        markers.addLayer(vivaMarker)
+        // guarda referência para remoção posterior quando o ponto for executado
+        marker._vivaLayer = vivaMarker
+      }
     })
   })
 
@@ -141,6 +160,8 @@ function confirmarExecucao(){
     markers.eachLayer(m=>{
       if(m.getPopup()?.getContent().includes(`abrirModal(${pontoSelecionadoId})`)){
         markers.removeLayer(m)
+        // se esse marcador tinha um layer "viva" associado, remover também
+        if(m._vivaLayer) markers.removeLayer(m._vivaLayer)
       }
     })
 
