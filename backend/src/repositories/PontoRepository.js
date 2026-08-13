@@ -65,44 +65,24 @@ class PontoRepository {
   };
 
   async criarManual(ponto) {
-    const { latitude, longitude, barramento, servico, status_defeito, manual} = ponto;
+    const { latitude, longitude, barramento, servico, status_defeito } = ponto;
 
-    console.log("VALORES:", {
-      latitude,
-      longitude,
-      barramento,
-      servico,
-      status_defeito,
-      manual
-    });
-
-    // 1️⃣ Insere em pontos_manuais
-    const [resultManual] = await this.db.query(`
-      INSERT INTO pontos_manuais 
-      (latitude, longitude, barramento, servico, status_defeito)
-      VALUES (?, ?, ?, ?, ?)
-    `, [latitude, longitude, barramento, servico, status_defeito]);
-
-    // 2️⃣ Insere também em pontos
-    const [resultPontos] = await this.db.query(`
+    const [result] = await this.db.query(`
       INSERT INTO pontos 
       (numero_oi, tipo_plano, latitude, longitude, barramento, servico, status_defeito, manual)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      null, // numero_oi
-      null, // tipo_plano
+      null,
+      null,
       latitude,
       longitude,
       barramento,
       servico,
       status_defeito || 'pendente',
-      1 // marca como manual
+      1
     ]);
 
-    return {
-      id_manual: resultManual.insertId,
-      id_ponto: resultPontos.insertId
-    };
+    return result.insertId;
   }
 }
 
