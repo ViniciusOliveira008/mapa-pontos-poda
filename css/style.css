@@ -103,8 +103,26 @@ body {
   border-radius: 12px;
 }
 
+#modalExecucao label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
 #modalExecucao input,
+#modalExecucao select,
 #modalExecucao textarea {
   width: 100%;
-  margin-bottom: 10px;
+  padding: 8px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+#modalExecucao textarea {
+  resize: vertical;
+  min-height: 80px;
 }
