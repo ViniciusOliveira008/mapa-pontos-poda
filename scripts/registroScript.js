@@ -72,6 +72,12 @@
                 : ""
             }
 
+            ${
+              row.tipo_linha
+                ? `<p><span class="label">�� Tipo de Linha:</span> <span class="badge ${row.tipo_linha.toLowerCase()}">${row.tipo_linha}</span></p>`
+                : ""
+            }
+
             <p>
               <span class="label">Tipo:</span>
               <span class="badge ${row.tipo_registro}">
