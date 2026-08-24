@@ -56,24 +56,9 @@
       container.innerHTML = "";
 
       lista.forEach(row => {
-        // Classe adicional no card para permitir estilizar por tipo_linha
-        const tipoLinhaClass = row.tipo_linha ? ` ${String(row.tipo_linha).toLowerCase().replace(/\s+/g, "-")}` : "";
-
-        // HTML da coluna tipo_linha (se existir)
-        const tipoLinhaHtml = row.tipo_linha
-          ? `
-            <div class="card-col tipo-linha-col">
-              <p><span class="label">🔗 Tipo de Linha:</span></p>
-              <p><span class="badge ${String(row.tipo_linha).toLowerCase()}">${row.tipo_linha}</span></p>
-            </div>
-          `
-          : "";
-
         container.innerHTML += `
-          <div class="card${tipoLinhaClass}">
+          <div class="card">
             <div class="card-grid">
-              ${tipoLinhaHtml}
-
               <div class="card-col details-col">
                 <h3>Registro ${row.id}</h3>
 
@@ -82,6 +67,7 @@
                 <p><span class="label">📅 Execução:</span> ${formatarData(row.data_execucao)}</p>
                 <p><span class="label">📝 Descrição:</span> ${row.descricao}</p>
                 <p><span class="label">🔌 Barramento:</span> ${row.barramento}</p>
+                <p><span class="label">🔗 Tipo de linha:</span> ${row.tipo_linha}</p>
 
                 ${
                   row.numero_nds
