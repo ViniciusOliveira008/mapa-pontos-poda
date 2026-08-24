@@ -56,34 +56,47 @@
       container.innerHTML = "";
 
       lista.forEach(row => {
+        // Classe adicional no card para permitir estilizar por tipo_linha
+        const tipoLinhaClass = row.tipo_linha ? ` ${String(row.tipo_linha).toLowerCase().replace(/\s+/g, "-")}` : "";
+
+        // HTML da coluna tipo_linha (se existir)
+        const tipoLinhaHtml = row.tipo_linha
+          ? `
+            <div class="card-col tipo-linha-col">
+              <p><span class="label">🔗 Tipo de Linha:</span></p>
+              <p><span class="badge ${String(row.tipo_linha).toLowerCase()}">${row.tipo_linha}</span></p>
+            </div>
+          `
+          : "";
+
         container.innerHTML += `
-          <div class="card">
-            <h3>Registro ${row.id}</h3>
+          <div class="card${tipoLinhaClass}">
+            <div class="card-grid">
+              ${tipoLinhaHtml}
 
-            <p><span class="label">📍 Ponto:</span> ${row.id_ponto}</p>
-            <p><span class="label">👷 Equipe:</span> ${row.equipe}</p>
-            <p><span class="label">📅 Execução:</span> ${formatarData(row.data_execucao)}</p>
-            <p><span class="label">📝 Descrição:</span> ${row.descricao}</p>
-            <p><span class="label">🔌 Barramento:</span> ${row.barramento}</p>
+              <div class="card-col details-col">
+                <h3>Registro ${row.id}</h3>
 
-            ${
-              row.numero_nds
-                ? `<p><span class="label">🔢 Nº NDS:</span> ${row.numero_nds}</p>`
-                : ""
-            }
+                <p><span class="label">📍 Ponto:</span> ${row.id_ponto}</p>
+                <p><span class="label">👷 Equipe:</span> ${row.equipe}</p>
+                <p><span class="label">📅 Execução:</span> ${formatarData(row.data_execucao)}</p>
+                <p><span class="label">📝 Descrição:</span> ${row.descricao}</p>
+                <p><span class="label">🔌 Barramento:</span> ${row.barramento}</p>
 
-            ${
-              row.tipo_linha
-                ? `<p><span class="label">�� Tipo de Linha:</span> <span class="badge ${row.tipo_linha.toLowerCase()}">${row.tipo_linha}</span></p>`
-                : ""
-            }
+                ${
+                  row.numero_nds
+                    ? `<p><span class="label">🔢 Nº NDS:</span> ${row.numero_nds}</p>`
+                    : ""
+                }
 
-            <p>
-              <span class="label">Tipo:</span>
-              <span class="badge ${row.tipo_registro}">
-                ${row.tipo_registro.toUpperCase()}
-              </span>
-            </p>
+                <p>
+                  <span class="label">Tipo:</span>
+                  <span class="badge ${row.tipo_registro}">
+                    ${row.tipo_registro.toUpperCase()}
+                  </span>
+                </p>
+              </div>
+            </div>
           </div>
         `;
       });
