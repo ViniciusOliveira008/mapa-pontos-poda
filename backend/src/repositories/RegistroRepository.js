@@ -13,15 +13,16 @@ class RegistroRepository {
     async criar(registro, barramento, tipo_registro) {
         const [result] = await this.db.execute(
             `INSERT INTO registros 
-            (data_execucao, descricao, equipe, id_ponto, barramento, tipo_registro) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
+            (data_execucao, descricao, equipe, id_ponto, barramento, tipo_registro, tipo_linha) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [
                 registro.data_execucao,
                 registro.descricao,
                 registro.equipe,
                 registro.id_ponto,
                 barramento,
-                tipo_registro
+                tipo_registro,
+                registro.tipo_linha
             ]
         );
         return result.insertId;
@@ -43,7 +44,8 @@ class RegistroRepository {
                  equipe = ?, 
                  id_ponto = ?, 
                  barramento = ?, 
-                 tipo_registro = ?
+                 tipo_registro = ?,
+                 tipo_linha = ?
              WHERE id = ?`,
             [
                 registro.data_execucao,
@@ -52,6 +54,7 @@ class RegistroRepository {
                 registro.id_ponto,
                 registro.barramento,
                 registro.tipo_registro,
+                registro.tipo_linha,
                 id
             ]
         );
