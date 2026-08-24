@@ -298,6 +298,8 @@ map.on('click', function(e){
   })
   .then(r => r.json())
   .then(data => {
+    // garante que use a chave correta do ID retornado
+    const ponto_id = data.id || data.id_ponto
 
     const marker = L.marker([lat, lng], {
       icon: servicoInfo.icon
@@ -307,7 +309,7 @@ map.on('click', function(e){
       <b>Serviço:</b> ${servicoInfo.tipo}<br>
       ${descricao ? descricao + '<br><br>' : '<br>'}
 
-      <button onclick="abrirModal(${data.id_ponto})" style="
+      <button onclick="abrirModal(${ponto_id})" style="
         background-color:#28a745;
         color:#fff;
         border:none;
