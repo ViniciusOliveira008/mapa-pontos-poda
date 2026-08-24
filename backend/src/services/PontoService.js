@@ -39,6 +39,8 @@
             const { id } = req.params
             const registro = req.body
 
+            console.log(registro.tipo_linha)
+
             const ponto = await this.PontoRepository.encontrarPorId(id); 
             if (!ponto) { 
                 return res.status(404).json({ error: 'Ponto não encontrado' });
