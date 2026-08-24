@@ -11,6 +11,8 @@ class RegistroRepository {
     }
 
     async criar(registro, barramento, tipo_registro) {
+        console.log(registro.tipo_linha)
+        
         const [result] = await this.db.execute(
             `INSERT INTO registros 
             (data_execucao, descricao, equipe, id_ponto, barramento, tipo_registro, tipo_linha) 
