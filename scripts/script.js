@@ -131,6 +131,7 @@ function abrirModal(id){
   pontoSelecionadoId=id
   inputEquipe.value=''
   inputData.value=''
+  inputTipoLinha.value=''
   inputDescricao.value=''
   // garantir botão habilitado ao abrir o modal (procura pelo botão que chama confirmarExecucao)
   const btn = document.querySelector('button[onclick="confirmarExecucao()"]')
@@ -147,9 +148,10 @@ function confirmarExecucao(){
   if(isSubmitting) return // já estamos enviando
   const equipe=inputEquipe.value.trim()
   const data=inputData.value
+  const tipoLinha=inputTipoLinha.value
 
-  if(!equipe || !data){
-    alert('Equipe e data são obrigatórios')
+  if(!equipe || !data || !tipoLinha){
+    alert('Equipe, data e tipo de linha são obrigatórios')
     return
   }
 
@@ -164,6 +166,7 @@ function confirmarExecucao(){
     body:JSON.stringify({
       equipe,
       data_execucao: data,
+      tipo_linha: tipoLinha,
       descricao: inputDescricao.value,
       id_ponto: pontoSelecionadoId,
     })
@@ -186,6 +189,7 @@ function confirmarExecucao(){
     // limpar inputs (UX) e fechar modal
     inputEquipe.value = ''
     inputData.value = ''
+    inputTipoLinha.value = ''
     inputDescricao.value = ''
     fecharModal()
   })
