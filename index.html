@@ -19,6 +19,7 @@
 
 <div class="loc-btn" onclick="goToLocation()">📍 Localizar</div>
 <div class="coord-btn" onclick="toggleCoordMode()">📌 Pontos Avulsos</div>
+<div class="records-btn" onclick="irParaRegistros()">📋 Registros</div>
 
 <div class="legend">
   <strong>Legenda</strong><br>
@@ -73,6 +74,12 @@
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
 <script src="scripts/script.js"> </script>
+
+<script>
+  function irParaRegistros() {
+    window.location.href = './registros.html';
+  }
+</script>
 
 </body>
 </html>
