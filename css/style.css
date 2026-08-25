@@ -73,6 +73,18 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.records-btn {
+  position: fixed; 
+  bottom: 20px;
+  left: 20px;
+  z-index:1000; 
+  color: #fff;
+  padding: 14px 18px;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .legend {
   position: fixed;
   bottom: 140px;
