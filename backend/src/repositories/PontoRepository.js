@@ -20,11 +20,12 @@ class PontoRepository {
 
   async criar(ponto) {
     const [result] = await this.db.execute(
-      "INSERT INTO pontos (id, numero_oi, tipo_plano, latitude, longitude, barramento, servico, status_defeito) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO pontos (id, numero_oi, tipo_plano, vao, latitude, longitude, barramento, servico, status_defeito) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         ponto.id,
         ponto.numero_oi,
         ponto.tipo_plano,
+        ponto.vao || null,
         ponto.latitude,
         ponto.longitude,
         ponto.barramento,
@@ -44,10 +45,11 @@ class PontoRepository {
 
   async atualizar(id, ponto) {
     await this.db.execute(
-      "UPDATE pontos SET numero_oi = ?, tipo_plano = ?, latitude = ?, longitude = ?, barramento = ?, servico = ?, status_defeito = ? WHERE id = ?",
+      "UPDATE pontos SET numero_oi = ?, tipo_plano = ?, vao = ?, latitude = ?, longitude = ?, barramento = ?, servico = ?, status_defeito = ? WHERE id = ?",
       [
         ponto.numero_oi,
         ponto.tipo_plano,
+        ponto.vao || null,
         ponto.latitude,
         ponto.longitude,
         ponto.barramento,
@@ -65,15 +67,16 @@ class PontoRepository {
   };
 
   async criarManual(ponto) {
-    const { latitude, longitude, barramento, servico, status_defeito } = ponto;
+    const { latitude, longitude, barramento, servico, status_defeito, vao } = ponto;
 
     const [result] = await this.db.query(`
       INSERT INTO pontos 
-      (numero_oi, tipo_plano, latitude, longitude, barramento, servico, status_defeito, manual)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      (numero_oi, tipo_plano, vao, latitude, longitude, barramento, servico, status_defeito, manual)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       null,
       null,
+      vao || null,
       latitude,
       longitude,
       barramento,
