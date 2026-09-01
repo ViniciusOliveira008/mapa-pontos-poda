@@ -63,6 +63,7 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
       const popupContent = isManual 
         ? `
           <b>Ponto manual</b><br>
+          <b>Vão:</b> ${row.vao}<br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
 
@@ -82,6 +83,7 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
         `
         : `
           <b>OI:</b> ${row.numero_oi}<br>
+          <b>Vão:</b> ${row.vao}<br>
           <b>Barramento:</b> ${row.barramento}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
 
