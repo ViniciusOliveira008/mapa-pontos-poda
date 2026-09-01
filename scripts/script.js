@@ -64,6 +64,7 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
         ? `
           <b>Ponto manual</b><br>
           <b>Barramento:</b> ${row.barramento}<br>
+          <b>Vão:</b> ${row.vao ? row.vao : '-'}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
 
           <button onclick="abrirModal(${row.id})" style="
@@ -83,6 +84,7 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
         : `
           <b>OI:</b> ${row.numero_oi}<br>
           <b>Barramento:</b> ${row.barramento}<br>
+          <b>Vão:</b> ${row.vao ? row.vao : '-'}<br>
           <b>Serviço:</b> ${row.servico}<br><br>
 
           <button onclick="abrirModal(${row.id})" style="
@@ -310,6 +312,7 @@ map.on('click', function(e){
     }).bindPopup(`
       <b>Ponto manual</b><br>
       <b>Barramento:</b> ${barramento}<br>
+      <b>Vão:</b> -<br>
       <b>Serviço:</b> ${servicoInfo.tipo}<br>
       ${descricao ? descricao + '<br><br>' : '<br>'}
 
