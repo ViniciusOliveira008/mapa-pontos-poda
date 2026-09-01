@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS pontos (
     id INT NOT NULL AUTO_INCREMENT,
     numero_oi VARCHAR(100),
     tipo_plano VARCHAR(100),
+    vao VARCHAR(50),
     latitude DECIMAL(10, 8) NOT NULL,
     longitude DECIMAL(11, 8) NOT NULL,
     barramento VARCHAR(100) NOT NULL,
