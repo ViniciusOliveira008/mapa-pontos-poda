@@ -83,12 +83,6 @@ class PontoService {
             return res.status(500).json({ error: 'Erro ao criar ponto manual' });
         }
     }
-
-    async listar_manuais(req, res) {
-        const pontos = await this.PontoRepository.listarManuais();
-        res.status(200).json(pontos);
-    }
-
 }
 
 export default PontoService;
