@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS pontos (
     longitude DECIMAL(11, 8) NOT NULL,
     barramento VARCHAR(100) NOT NULL,
     servico VARCHAR(100) NOT NULL,
-    tipo_linha VARCHAR(50) NOT NULL,
+    tipo_linha VARCHAR(50),
     status_defeito ENUM('executado', 'pendente') NOT NULL DEFAULT 'pendente',
     manual TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
