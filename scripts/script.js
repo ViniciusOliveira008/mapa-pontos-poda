@@ -102,8 +102,8 @@ fetch('https://mapa-pontos-poda.onrender.com/pontos/listar_pendentes')
           </button>
         `
 
-      // verifica se detalhes indicam VIVA
-      const isViva = normalize(row.detalhes) === 'viva'
+      // verifica se o tipo_linha indicam VIVA
+      const isViva = normalize(row.tipo_linha) === 'viva'
 
       const marker = L.marker([lat,lon],{icon})
         .bindPopup(popupContent)
